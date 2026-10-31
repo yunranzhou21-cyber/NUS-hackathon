@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from query_understanding import get_provider, interpret
 from search import SearchEngine, build_index
 
 ROOT = Path(__file__).resolve().parent
@@ -33,6 +34,8 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         if path == '/api/health':
             self.json(200, {'status': 'ok', 'scope': 'LOCAL_DEMO'})
+        elif path == '/api/status':
+            self.json(200, {'ai_configured': get_provider() is not None})
         elif path in ASSETS:
             filename, mime = ASSETS[path]
             self.send(200, (ROOT / 'web' / filename).read_bytes(), mime)
@@ -70,11 +73,35 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError()
         except (ValueError, UnicodeError):
             return self.json(400, {'error': 'INVALID_REQUEST'})
+        use_ai = value.get('use_ai', False)
+        if type(use_ai) is not bool:
+            return self.json(400, {'error': 'INVALID_REQUEST'})
         engine = None
         try:
             engine = SearchEngine(str(ROOT / 'data/processed/records.jsonl'),
                                   str(ROOT / 'data/search/search.sqlite3'))
-            self.json(200, engine.search(query, config, limit, history))
+            provider = get_provider() if use_ai else None
+            interpretation = interpret(query, provider, engine.makes)
+            if use_ai and provider is None:
+                interpretation['notice'] = 'AI_NOT_CONFIGURED_USING_LOCAL_RULES'
+            config = dict(config)
+            for key, found in interpretation['fields'].items():
+                typed = config.get(key, '').strip()
+                if typed and typed.lower() != found.lower():
+                    interpretation['conflict'] = key
+                    return self.json(200, {
+                        'status': 'NEEDS_CLARIFICATION', 'query': query, 'results': [],
+                        'reason_codes': ['QUERY_CONFIGURATION_CONFLICT'],
+                        'interpretation': interpretation, 'retrieval_ms': 0,
+                        'scope': 'SUPPLIED_CSV_ONLY', 'operational_answer': 'REFUSE',
+                        'legal_applicability': 'UNVERIFIED', 'not_exhaustive': True})
+                if not typed:
+                    config[key] = found
+            if interpretation['intent'] == 'find_history':
+                history = True
+            result = engine.search(query, config, limit, history)
+            result['interpretation'] = interpretation
+            self.json(200, result)
         except (ValueError, sqlite3.Error, OSError):
             self.json(503, {'error': 'INDEX_UNAVAILABLE',
                             'message': 'Run python search.py build, then retry.'})

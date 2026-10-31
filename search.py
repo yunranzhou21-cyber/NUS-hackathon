@@ -20,6 +20,9 @@ the a an of for to in on and or with is are does do which what how find show
 me about related applicable apply applies serial number numbers model engine
 aircraft airplane airplanes helicopter helicopters directives directive ad
 proposals proposal nprm sn
+my our your i we it its this that these those be been can could should would
+need needs any there by at from has have affect affected affects cover covers
+covered include included including
 """.split())
 CHINESE_INTENTS = (
     "有哪些相关提案", "有哪些相关规定", "有哪些相关指令", "有哪些", "查找",
@@ -201,6 +204,8 @@ class SearchEngine:
                 raise ValueError("Search index stale; run: python search.py build")
             self.models = [r[0] for r in self.connection.execute(
                 "SELECT DISTINCT value FROM models")]
+            self.makes = [r[0] for r in self.connection.execute(
+                "SELECT DISTINCT make FROM documents WHERE make IS NOT NULL")]
         except Exception:
             self.connection.close()
             raise

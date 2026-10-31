@@ -24,6 +24,11 @@ const reasons = {
  UNSUPPORTED_MODEL_LIST:'The model list requires review.',
  UNCONFIRMED_BLOCK_BOUNDARY:'The complete applicability block could not be confirmed.'
 };
+const notices={
+ AI_NOT_CONFIGURED_USING_LOCAL_RULES:'AI is not configured. Local rules were used instead.',
+ AI_CALL_FAILED_USING_LOCAL_RULES:'The AI service did not respond. Local rules were used instead.',
+ AI_OUTPUT_INVALID_USING_LOCAL_RULES:'The AI returned an unusable answer and was ignored. Local rules were used instead.'
+};
 function node(tag, text, cls) { const n=document.createElement(tag); if(text!==undefined)n.textContent=text; if(cls)n.className=cls; return n; }
 function detail(parent, label) {const d=node('details');d.append(node('summary',label));parent.append(d);return d;}
 function evidence(parent, ev, fallback) {
@@ -41,6 +46,21 @@ function render(data) {
  $('summary').append(node('h2',titles[data.status] || 'Search complete'));
  $('summary').append(node('p',`${data.results.length} results returned · Retrieval ${data.retrieval_ms} ms · Not exhaustive`));
  for(const code of data.reason_codes || [])$('summary').append(node('p',reasons[code] || code));
+ if(data.interpretation){
+  const i=data.interpretation, box=node('div',undefined,'interp');
+  const src={llm_validated:'AI (validated)',local_rules:'Local rules'};
+  const intents={search_documents:'Search documents',check_proposed_scope:'Check proposed scope',find_history:'Find historical records'};
+  box.append(node('strong','How your question was interpreted'));
+  box.append(node('span',src[i.source] || i.source,'badge '+(i.source==='llm_validated'?'':'neutral')));
+  box.append(node('p',`Intent: ${intents[i.intent] || i.intent}`));
+  const entries=Object.entries(i.fields);
+  box.append(node('p',entries.length?'Extracted: '+entries.map(([k,v])=>`${k.replace('_',' ')} = ${v}`).join(' · '):'Extracted: no structured fields'));
+  for(const r of i.rejected)box.append(node('p',`Discarded ${r.field} “${r.value}”: not found in your text`,'reason'));
+  if(i.notice)box.append(node('p',notices[i.notice] || i.notice,'reason'));
+  if(i.conflict)box.append(node('p',`The ${i.conflict.replace('_',' ')} in your question differs from the form field. Please resolve it.`,'reason'));
+  box.append(node('p',i.sent_to_external_service?'Only your question text was sent to the model. No documents were sent.':'Processed locally. Nothing left this machine.','meta'));
+  $('summary').append(box);
+ }
  if(data.query_plan)$('summary').append(node('p',`Parsed configuration: ${JSON.stringify(data.query_plan.configuration)} · Keywords: ${data.query_plan.lexical_terms.join(' / ')}`));
  const kinds={proposal:'Proposed rule',withdrawal_notice:'Withdrawal notice',supplemental_or_revised_proposal:'Supplemental / revised proposal',needs_review:'Document type needs review',unknown:'Unknown document type'};
  for(const item of data.results){
@@ -65,6 +85,10 @@ function render(data) {
  }
  $('raw').textContent=JSON.stringify(data,null,2);$('raw-panel').hidden=false;
 }
+fetch('/api/status').then(r=>r.json()).then(s=>{
+ $('use_ai').disabled=!s.ai_configured;$('use_ai').checked=s.ai_configured;
+ $('ai-hint').textContent=s.ai_configured?'Only your question is sent to the model. Documents never are.':'Not configured. Set AI_API_KEY and restart to enable. Local rules are used meanwhile.';
+}).catch(()=>{$('ai-hint').textContent='AI status unavailable. Local rules are used.';});
 let requestNumber=0;
 $('search-form').addEventListener('submit',async event=>{
  event.preventDefault(); const current=++requestNumber;
@@ -73,7 +97,7 @@ $('search-form').addEventListener('submit',async event=>{
  $('results').replaceChildren();$('raw-panel').hidden=true;
  $('summary').replaceChildren(node('h2','Searching source evidence…'));
  try{
-  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked})});
+  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked,use_ai:$('use_ai').checked})});
   const data=await response.json();if(!response.ok)throw new Error(data.error==='INDEX_UNAVAILABLE'?'Search index unavailable. Run python search.py build.':'Request failed. Check your inputs and try again.');
   if(current===requestNumber)render(data);
  }catch(error){if(current===requestNumber)$('summary').replaceChildren(node('h2','Search could not complete'),node('p',error.message));}
