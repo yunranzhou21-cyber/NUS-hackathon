@@ -2,18 +2,57 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TraceAD · Airworthiness evidence search</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
 <body>
-<header><a class="brand" href="/">✦ TraceAD <span>Airworthiness evidence search</span></a><span class="local">LOCAL DEMO · OFFLINE SEARCH</span></header>
+<header><a class="brand" href="/">✦ TraceAD <span>Airworthiness evidence search</span></a><span class="local">LOCAL INDEX · ON-DEMAND FULL TEXT</span></header>
 <main>
 <section class="intro"><p class="eyebrow">FAA / AIRWORTHINESS INTELLIGENCE</p><h1>Find the evidence.<br>Trace every decision.</h1><p>Search the supplied FAA documents, compare configuration conditions, and inspect the source. When evidence is insufficient, the system stops.</p></section>
 <div class="notice"><strong>Proposal research only. Not for maintenance decisions.</strong><p>The dataset includes proposed rules and withdrawal notices. A text-scope match does not establish an effective AD or legal applicability to your equipment.</p></div>
+<section class="aircraft-lab" aria-labelledby="aircraft-heading">
+ <div class="aircraft-visual">
+  <div class="aircraft-topline"><span class="eyebrow">EXPLORE YOUR AIRCRAFT</span><span class="schematic-tag">INTERACTIVE SCHEMATIC</span></div>
+  <div class="aircraft-map" id="aircraft-map" data-active="airframe">
+   <svg viewBox="0 0 900 310" role="img" aria-labelledby="plane-title plane-desc">
+    <title id="plane-title">Interactive aircraft overview</title><desc id="plane-desc">A generic top-view aircraft illustration. Use the labeled buttons to explore source mentions of the airframe, wings, engines and landing gear.</desc>
+    <defs><linearGradient id="plane-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#bad0cc"/></linearGradient></defs>
+    <g class="aircraft-lines" fill="none" stroke="#c7d9d5" stroke-dasharray="4 8"><path d="M35 155H865M450 10V300"/><ellipse cx="450" cy="155" rx="355" ry="133"/></g>
+    <g stroke="#688f89" stroke-width="2" stroke-linejoin="round" fill="url(#plane-metal)">
+     <g class="plane-part part-wings"><path d="M335 140L504 26H548L466 145Z"/><path d="M335 170L504 284H548L466 165Z"/></g>
+     <g class="plane-part part-engines"><rect x="388" y="84" width="78" height="26" rx="13"/><rect x="388" y="200" width="78" height="26" rx="13"/><path d="M400 86V108M400 202V224"/></g>
+     <g class="plane-part part-airframe"><path d="M80 155Q104 132 165 132L620 140L714 86H752L699 147L798 150Q814 155 798 160L699 163L752 224H714L620 170L165 178Q104 178 80 155Z"/></g>
+     <path d="M115 146L136 140L136 170L115 164Z" fill="#257b76" stroke="none"/>
+     <path d="M160 155H700" fill="none" stroke="#a4bfba" stroke-dasharray="4 5"/>
+     <g class="plane-part part-gear" fill="#315d58"><rect x="191" y="166" width="19" height="8" rx="3"/><rect x="375" y="143" width="23" height="8" rx="3"/><rect x="375" y="162" width="23" height="8" rx="3"/></g>
+    </g>
+   </svg>
+   <button type="button" class="hotspot hotspot-airframe" data-part="airframe" aria-pressed="true"><span></span>Airframe</button>
+   <button type="button" class="hotspot hotspot-wings" data-part="wings" aria-pressed="false"><span></span>Wings</button>
+   <button type="button" class="hotspot hotspot-engines" data-part="engines" aria-pressed="false"><span></span>Engines</button>
+   <button type="button" class="hotspot hotspot-gear" data-part="gear" aria-pressed="false"><span></span>Landing gear</button>
+  </div>
+  <p class="schematic-note">Generic illustration, not a model-specific drawing. Selecting a part explores text mentions; it does not establish component applicability.</p>
+ </div>
+ <div class="aircraft-context">
+  <span class="eyebrow">YOUR SEARCH CONTEXT</span><h2 id="aircraft-heading">Choose an aircraft to begin</h2>
+  <p id="aircraft-identifiers" class="meta">Load a demo or enter your own configuration below.</p>
+  <div class="preset-grid" aria-label="Autofill demonstration configurations">
+   <button type="button" data-preset="embraer"><strong>EMB-120</strong><span>Serial range example</span></button>
+   <button type="button" data-preset="boeing"><strong>757-200</strong><span>Line number example</span></button>
+   <button type="button" data-preset="airbus"><strong>A320-211</strong><span>MSN · historical example</span></button>
+  </div>
+  <div class="part-context"><strong id="part-title">Airframe selected</strong><p id="part-description">Explore the aircraft's source documents, then inspect the cited configuration conditions.</p><button type="button" id="search-part" class="secondary">Explore airframe mentions ↗</button></div>
+  <p id="aircraft-feedback" class="hint" role="status">Demo configurations are examples, not saved aircraft records.</p>
+ </div>
+</section>
 <div class="layout"><aside><form id="search-form">
 <h2>Search &amp; configuration</h2>
 <label for="query">Question / keywords</label><textarea id="query" required maxlength="1000" rows="3" placeholder="Find proposals for EMB-120 serial number 120006"></textarea>
-<label for="make">Manufacturer <span>recommended</span></label><input id="make" maxlength="150" placeholder="e.g. Embraer or Boeing">
-<label for="model">Model <span>optional</span></label><input id="model" maxlength="150" placeholder="e.g. EMB-120">
+<button type="button" id="autofill" class="secondary autofill-button">Autofill from my question</button><p id="autofill-status" class="hint" role="status">Extracts stated fields locally. Existing conflicting values are kept for you to review.</p>
+<label for="make">Manufacturer <span>recommended</span></label><input id="make" list="make-options" maxlength="150" placeholder="e.g. Embraer or Boeing"><datalist id="make-options"></datalist>
+<label for="model">Model <span>optional</span></label><input id="model" list="model-options" maxlength="150" placeholder="e.g. EMB-120"><datalist id="model-options"></datalist>
 <label for="manufacturer_serial_number">Manufacturer serial number (MSN)</label><input id="manufacturer_serial_number" maxlength="150" placeholder="Use when the source specifies MSN">
 <div class="two"><div><label for="serial_number">Serial number</label><input id="serial_number" maxlength="150" placeholder="120006"></div><div><label for="line_number">Line number</label><input id="line_number" maxlength="150" placeholder="Not a serial number"></div></div>
 <label class="checkbox"><input id="history" type="checkbox"> Include historical records</label>
+<label class="checkbox"><input id="fetch_fulltext" type="checkbox" checked> Fetch full text for the top 3 results</label>
+<p class="hint">Candidates appear first. Official XML loads in the background and is cached for 24 hours. PDFs download only when requested.</p>
 <label class="checkbox"><input id="historical" type="checkbox"> Compare superseded proposals</label>
 <p class="hint">Off by default. When on, an older proposal's text can be compared, labeled as historical text only. It is not current.</p>
 <label class="checkbox ai"><input id="use_ai" type="checkbox" disabled> AI query understanding</label>
@@ -28,6 +67,6 @@
 <p class="hint">By default, searches the latest observation per docket in this CSV, not the latest effective regulation.</p>
 <button id="submit" class="primary" type="submit">Search evidence ↗</button>
 </form><section class="examples"><h3>Try an example</h3><button type="button" data-example="serial">Compare a serial-number range</button><button type="button" data-example="corrosion">Boeing corrosion information</button><button type="button" data-example="unknown">Refuse when there is no evidence</button></section></aside>
-<section class="workspace" aria-label="Search results"><div id="summary" role="status" aria-live="polite"><h2>Start with a query</h2><p>Enter a model or keyword, then inspect the configuration checks and source text.</p></div><div id="results"></div><details class="boundary"><summary>What can this system do?</summary><p>Local keyword search with limited English and Chinese query patterns. Models are matched exactly. Complex modifications, external service bulletins, and unsupported conditions are not evaluated automatically. Results are limited and do not list every applicable directive.</p><p>Optional AI turns your question into structured fields. Every value it returns must appear in your own text or it is discarded. Only your question is sent to the model, never the documents, and applicability is always decided by deterministic rules.</p><p>Citations identify CSV fields and character ranges. Published page numbers cover the document, not an exact claim page. No expert review or legal-effect verification has been performed.</p></details><details id="raw-panel" hidden><summary>View full JSON response</summary><pre id="raw"></pre></details></section></div>
+<section class="workspace" aria-label="Search results"><div id="summary" role="status" aria-live="polite"><h2>Start with a query</h2><p>Enter a model or keyword, then inspect the configuration checks and source text.</p></div><div id="results"></div><details class="boundary"><summary>What can this system do?</summary><p>Local keyword search with limited English and Chinese query patterns. Models are matched exactly. Complex modifications, external service bulletins, and unsupported conditions are not evaluated automatically. Results are limited and do not list every applicable directive.</p><p>Optional AI turns your question into structured fields. Every value it returns must appear in your own text or it is discarded. Only your question is sent to the model, never the documents, and applicability is always decided by deterministic rules.</p><p>CSV citations identify fields and character ranges. Fetched XML citations add sections and printed pages only where the source supplies page markers. PDFs are fetched separately on request. No expert review or legal-effect verification has been performed.</p></details><details id="raw-panel" hidden><summary>View full JSON response</summary><pre id="raw"></pre></details></section></div>
 </main><footer>TraceAD · Evidence before action <span>AI only interprets your question, never judges applicability · Legal applicability unverified</span></footer>
 </body></html>

@@ -27,6 +27,30 @@ The server binds to localhost. At startup, it rebuilds a missing or stale index.
 
 ## Features
 
+### Interactive aircraft and autofill
+
+A scalable aircraft schematic highlights the airframe, wings, engines or landing
+gear when selected. The selected area offers a search for text mentions, not an
+assertion that a document applies to that component. The illustration is generic,
+not a model-specific drawing.
+
+Use demo presets for EMB-120 serials, Boeing 757 line numbers or a historical A320
+MSN case. Presets fill example values for review without immediately searching.
+**Autofill from my question** extracts explicitly stated fields locally, keeps
+conflicting existing inputs, and never invents a manufacturer or identifier.
+Manufacturer and model inputs also suggest names already present in the index.
+
+### On-demand official full text
+
+Local candidates appear first. By default, the browser fetches XML for the top
+three results in the background and reuses a 24-hour cache. Disable this option
+for local-only searches. PDFs download only when explicitly requested. Fetched
+source passages include chapters/sections, source hashes and printed page numbers
+where XML page markers are present; unsupported conditions remain unknown.
+
+The page reports downloaded document counts and cache size. The cache has a
+50 MiB budget and is excluded from Git. See [on-demand fetching and API details](docs/on_demand_fulltext.md).
+
 ### Traceable evidence search
 
 - **Docket lookup:** a known docket in the question retrieves its records, newest observation first. An unknown docket-shaped identifier is refused rather than silently replaced with a similar search.
@@ -89,7 +113,7 @@ python evaluate_cases.py --out eval/results_configuration_v12.json
 python evaluate_cases.py --historical --out eval/results_configuration_v12_historical.json
 ```
 
-The current regression suite passed **105 tests**. On the **34 supplied labeled cases**, with unchanged case labels and scoring criteria:
+The current suite passes **118 tests**, including autofill and on-demand fetch/cache/API checks. On the **34 supplied labeled cases**, with unchanged case labels and scoring criteria:
 
 | End-to-end mode | Passed | Safe failures / declines | Unsafe errors observed |
 | --- | --- | --- | --- |
@@ -98,14 +122,16 @@ The current regression suite passed **105 tests**. On the **34 supplied labeled 
 
 **97% is the historical-text comparison result, not default-mode accuracy or accuracy on current regulations.** Many supplied cases reference older proposals that default mode deliberately declines. The remaining historical-mode failure, T07, expects a definite model mismatch while the engine conservatively returns `UNKNOWN`.
 
+These 34 cases evaluate the offline CSV/rule path. They do not establish the accuracy of newly fetched full-text parsing.
+
 All 34 labeled target records were retrieved in both modes. The evaluator also reports a separate rule-only diagnostic that supplies the target record and manufacturer; it is not the end-to-end score. Reports record the case-file hash, parser version, inputs, and rule-level reasons.
 
 Zero unsafe errors on these cases does not prove zero hallucinations or general correctness. These cases have been used during development and are not an independent held-out evaluation. See [implementation and validation details](docs/configuration_v12.md), [default-mode results](eval/results_configuration_v12.json), and [historical-mode results](eval/results_configuration_v12_historical.json).
 
 ## Data and performance limits
 
-- The current corpus contains **431 CSV records and 1,552 indexed passages**. It is not a general multi-page PDF ingestion pipeline.
-- Citations identify exact CSV text spans. Published page ranges cover the document; they do **not** establish the exact page for an individual claim.
+- The lightweight corpus contains **431 CSV records and 1,552 indexed passages**. Official XML is fetched on demand; live cache counts are shown in the page. Arbitrary PDF ingestion and OCR are not implemented.
+- CSV citations identify text spans with document-level page ranges. Fetched XML adds sections and explicit printed-page markers when available; absent markers are never replaced by guessed page numbers.
 - Rule extraction has no expert approval or verified legal-effect status. Search results are limited and not exhaustive.
 - Limited English/Chinese query patterns are supported; arbitrary natural-language understanding and semantic vector retrieval are not implemented.
 - Sub-three-second retrieval across **1,000+ actual pages has not been verified**. Existing timing reports cover this local corpus and do not establish that requirement.
@@ -130,6 +156,7 @@ This rebuilds the index and updates `docs/search_benchmark.json`. Retrieval timi
 | `answerability.py` | Identify requests that retrieved records cannot answer. |
 | `query_understanding.py` | Local interpretation and optional validated AI field extraction. |
 | `web_app.py`, `web/` | Local HTTP API and browser interface. |
+| `fulltext.py` | On-demand official XML, source citations, bounded cache and separately requested PDFs. |
 | `evaluate_cases.py`, `eval/` | Supplied labeled cases and reproducible evaluation reports. |
 | `data/processed/` | Prepared records and data-quality reports. |
 | `data/rules/` | Generated rule records, extraction report, and review queue. |

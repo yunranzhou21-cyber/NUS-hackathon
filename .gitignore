@@ -5,6 +5,7 @@ __pycache__/
 .env.*
 !.env.example
 data/search/
+data/fulltext/
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm
