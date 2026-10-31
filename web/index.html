@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TraceAD · Airworthiness evidence search</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><a class="brand" href="/">✦ TraceAD <span>Airworthiness evidence search</span></a><span class="local">LOCAL DEMO · OFFLINE SEARCH</span></header>
+<main>
+<section class="intro"><p class="eyebrow">FAA / AIRWORTHINESS INTELLIGENCE</p><h1>Find the evidence.<br>Trace every decision.</h1><p>Search the supplied FAA documents, compare configuration conditions, and inspect the source. When evidence is insufficient, the system stops.</p></section>
+<div class="notice"><strong>Proposal research only. Not for maintenance decisions.</strong><p>The dataset includes proposed rules and withdrawal notices. A text-scope match does not establish an effective AD or legal applicability to your equipment.</p></div>
+<div class="layout"><aside><form id="search-form">
+<h2>Search &amp; configuration</h2>
+<label for="query">Question / keywords</label><textarea id="query" required maxlength="1000" rows="3" placeholder="Find proposals for EMB-120 serial number 120006"></textarea>
+<label for="make">Manufacturer <span>recommended</span></label><input id="make" maxlength="150" placeholder="e.g. Embraer or Boeing">
+<label for="model">Model <span>optional</span></label><input id="model" maxlength="150" placeholder="e.g. EMB-120">
+<div class="two"><div><label for="serial_number">Serial number</label><input id="serial_number" maxlength="150" placeholder="120006"></div><div><label for="line_number">Line number</label><input id="line_number" maxlength="150" placeholder="Not a serial number"></div></div>
+<label class="checkbox"><input id="history" type="checkbox"> Include historical records</label>
+<p class="hint">By default, searches the latest observation per docket in this CSV, not the latest effective regulation.</p>
+<button id="submit" class="primary" type="submit">Search evidence ↗</button>
+</form><section class="examples"><h3>Try an example</h3><button type="button" data-example="serial">Compare a serial-number range</button><button type="button" data-example="corrosion">Boeing corrosion information</button><button type="button" data-example="unknown">Refuse when there is no evidence</button></section></aside>
+<section class="workspace" aria-label="Search results"><div id="summary" role="status" aria-live="polite"><h2>Start with a query</h2><p>Enter a model or keyword, then inspect the configuration checks and source text.</p></div><div id="results"></div><details class="boundary"><summary>What can this system do?</summary><p>Local keyword search with limited English and Chinese query patterns. Models are matched exactly. Complex modifications, external service bulletins, and unsupported conditions are not evaluated automatically. Results are limited and do not list every applicable directive.</p><p>Citations identify CSV fields and character ranges. Published page numbers cover the document, not an exact claim page. No expert review or legal-effect verification has been performed.</p></details><details id="raw-panel" hidden><summary>View full JSON response</summary><pre id="raw"></pre></details></section></div>
+</main><footer>TraceAD · Evidence before action <span>Local data · No language model calls · Legal applicability unverified</span></footer>
+</body></html>
