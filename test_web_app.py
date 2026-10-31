@@ -1,6 +1,9 @@
 import json
 import threading
 import unittest
+import tempfile
+import time
+from unittest.mock import patch
 from http.server import ThreadingHTTPServer
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -127,6 +130,92 @@ class WebTests(unittest.TestCase):
             value = json.load(response)
             self.assertEqual(value['status'], 'REFUSE')
             self.assertEqual(value['results'], [])
+
+    def test_aircraft_suggestions_and_local_autofill(self):
+        with self.request('/api/aircraft') as response:
+            self.assertEqual(response.status, 200)
+            catalog = json.load(response)
+            self.assertIn('EMB-120', catalog['models'])
+            self.assertIn('Embraer', catalog['manufacturers'])
+        for query, expected in [('EMB-120 serial number 120006', {'model': 'EMB-120', 'serial_number': '120006'}),
+                                ('A320-211 MSN 1516', {'model': 'A320-211', 'manufacturer_serial_number': '1516'})]:
+            with self.subTest(query=query):
+                with self.request('/api/autofill', {'query': query}) as response:
+                    self.assertEqual(response.status, 200)
+                    value = json.load(response)
+                    self.assertEqual(value['fields'], expected)
+                    self.assertFalse(value['sent_to_external_service'])
+                    self.assertNotIn('make', value['fields'])
+
+    def test_autofill_conflicts_refused_and_origin_checked(self):
+        for query in ['EMB-120 serial number 120006 and serial number 120007',
+                      'Compare EMB-120 and A320-211', 'Embraer and Boeing aircraft']:
+            with self.subTest(query=query):
+                with self.request('/api/autofill', {'query': query}) as response:
+                    value = json.load(response)
+                    self.assertEqual(value['status'], 'NEEDS_CLARIFICATION')
+                    self.assertEqual(value['fields'], {})
+        for value in [[], {'query': 123}, {'query': 'x' * 1001}]:
+            with self.request('/api/autofill', value) as response:
+                self.assertEqual(response.status, 400)
+        with self.request('/api/autofill', {'query': 'EMB-120'}, 'https://example.com') as response:
+            self.assertEqual(response.status, 403)
+
+    def test_fulltext_http_flow_is_lazy_and_pdf_is_explicit(self):
+        from applicability import load_records
+        from fulltext import FullTextStore
+        import test_fulltext
+        rec = next(r for r in load_records() if r['record_id'] == 'row-0157')
+        calls = []
+        def fetch_document(url, limit):
+            calls.append(url)
+            if url.endswith('.json'):
+                return json.dumps({'document_number': '2024-25883', 'type': 'Proposed Rule',
+                    'action': 'Notice of proposed rulemaking (NPRM).', 'citation': '89 FR 88173',
+                    'docket_ids': ['Docket No. FAA-2024-2142'],
+                    'full_text_xml_url': 'https://www.federalregister.gov/documents/full_text/xml/2024/11/07/2024-25883.xml',
+                    'pdf_url': 'https://www.govinfo.gov/content/pkg/FR-2024-11-07/pdf/2024-25883.pdf'}).encode()
+            return b'%PDF-1.7\nfixture' if url.endswith('.pdf') else test_fulltext.XML
+        with tempfile.TemporaryDirectory() as directory:
+            store = FullTextStore([rec], directory, fetch=fetch_document)
+            try:
+                with patch('web_app.fulltext_store', return_value=store):
+                    with self.request('/api/corpus') as response:
+                        self.assertEqual(json.load(response)['cached_documents'], 0)
+                    payload = {'record_id': 'row-0157', 'action': 'status'}
+                    with self.request('/api/fulltext', payload) as response:
+                        self.assertEqual(json.load(response)['status'], 'NOT_CACHED')
+                    self.assertEqual(calls, [])
+                    for action in ('text', 'pdf'):
+                        payload['action'] = action
+                        for _ in range(100):
+                            with self.request('/api/fulltext', payload) as response:
+                                self.assertEqual(response.status, 200)
+                                state = json.load(response)
+                            if state['status'] != 'FETCHING':
+                                break
+                            time.sleep(.01)
+                        self.assertEqual(state['status'], 'READY')
+                        self.assertEqual(state['configuration_check']['basis'], 'FETCHED_FULL_TEXT')
+                        if action == 'text':
+                            self.assertFalse(any(url.endswith('.pdf') for url in calls))
+                        else:
+                            with self.request(state['pdf_url']) as response:
+                                self.assertTrue(response.read().startswith(b'%PDF-'))
+                    self.assertEqual(len(calls), 3)
+            finally:
+                store.close()
+
+    def test_fulltext_rejects_bad_requests_and_cross_origin(self):
+        for value in ([], {'record_id': '../search.py'}, {'record_id': 'row-0157', 'action': 'delete'},
+                      {'record_id': 'row-0157', 'historical_comparison': 'yes'},
+                      {'record_id': 'row-0157', 'configuration': {'external_conditions': []}}):
+            with self.request('/api/fulltext', value) as response:
+                self.assertEqual(response.status, 400)
+        with self.request('/api/fulltext', {'record_id': 'row-0157', 'action': 'text'}, 'https://example.com') as response:
+            self.assertEqual(response.status, 403)
+        with self.request('/api/fulltext/pdf/../../search.py') as response:
+            self.assertEqual(response.status, 404)
 
 
 if __name__ == '__main__':
