@@ -15,6 +15,13 @@
 <label class="checkbox"><input id="history" type="checkbox"> Include historical records</label>
 <label class="checkbox ai"><input id="use_ai" type="checkbox" disabled> AI query understanding</label>
 <p class="hint" id="ai-hint">Checking AI status…</p>
+<details id="ai-settings"><summary>AI settings</summary>
+<label for="api_key">API key</label><input id="api_key" type="password" maxlength="300" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+<label for="ai_model">Model <span>optional</span></label><input id="ai_model" maxlength="100" autocomplete="off" placeholder="gpt-4o-mini">
+<label for="ai_base">Endpoint <span>optional</span></label><input id="ai_base" maxlength="200" autocomplete="off" placeholder="https://api.openai.com/v1">
+<div class="two"><button type="button" id="ai-connect" class="secondary">Connect</button><button type="button" id="ai-disconnect" class="secondary" disabled>Disconnect</button></div>
+<p class="hint" id="ai-result" role="status"></p>
+<p class="hint">The key stays in this server's memory only. It is never saved to disk, logged, or sent back to the page, and it is forgotten when the server stops. Your question text is sent to the endpoint you choose. Documents are not.</p></details>
 <p class="hint">By default, searches the latest observation per docket in this CSV, not the latest effective regulation.</p>
 <button id="submit" class="primary" type="submit">Search evidence ↗</button>
 </form><section class="examples"><h3>Try an example</h3><button type="button" data-example="serial">Compare a serial-number range</button><button type="button" data-example="corrosion">Boeing corrosion information</button><button type="button" data-example="unknown">Refuse when there is no evidence</button></section></aside>

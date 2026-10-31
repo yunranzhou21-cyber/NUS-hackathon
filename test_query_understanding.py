@@ -1,10 +1,13 @@
 import json
+import os
 import threading
 import unittest
 from http.server import ThreadingHTTPServer
 from unittest import mock
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
+import query_understanding as qu
 from query_understanding import interpret, rules_interpret, validate
 import web_app
 
@@ -127,10 +130,136 @@ class WebIntegrationTests(unittest.TestCase):
         self.assertEqual(data["interpretation"]["intent"], "find_history")
         self.assertTrue(data["history_included"])
 
-    def test_status_endpoint_leaks_no_secret(self):
+    def test_status_endpoint_reports_configured(self):
         with mock.patch("web_app.get_provider", return_value=model()):
             with urlopen(self.base + "/api/status") as r:
-                self.assertEqual(json.load(r), {"ai_configured": True})
+                self.assertTrue(json.load(r)["ai_configured"])
+
+
+SECRET = "sk-test-SECRET-1234567890"
+
+
+def fake_chat(content):
+    import io
+    body = json.dumps({"choices": [{"message": {"content": content}}]}).encode()
+    return lambda request, timeout=None: io.BytesIO(body)
+
+
+GOOD = json.dumps({"intent": "check_proposed_scope", "model": "EMB-120", "serial_number": "100"})
+
+
+class SettingsTests(unittest.TestCase):
+    def test_validation(self):
+        ok, err = qu.validate_settings(SECRET, "m-1", "https://api.example.com/v1/")
+        self.assertIsNone(err)
+        self.assertEqual(ok["base_url"], "https://api.example.com/v1")
+        for args in [("short", "m", ""), ("has space in key", "m", ""), (SECRET, "bad model!", ""),
+                     (SECRET, "m", "http://api.example.com/v1"),     # http only for loopback
+                     (SECRET, "m", "https://user:pw@api.example.com"),
+                     (SECRET, "m", "https://api.example.com/v1?x=1"),
+                     (SECRET, "m", "ftp://api.example.com"), (None, "m", ""), (SECRET, "m", "javascript:alert(1)")]:
+            self.assertIsNotNone(qu.validate_settings(*args)[1], args)
+        self.assertIsNone(qu.validate_settings(SECRET, "m", "http://localhost:11434/v1")[1])
+
+    def test_connection_results(self):
+        provider = qu.provider_for({"api_key": SECRET, "model": "m", "base_url": "https://x.test/v1"})
+        with mock.patch("query_understanding.urllib.request.urlopen", fake_chat(GOOD)):
+            self.assertEqual(qu.test_connection(provider), (True, None))
+        with mock.patch("query_understanding.urllib.request.urlopen", fake_chat("hello")):
+            self.assertEqual(qu.test_connection(provider), (False, "MODEL_OUTPUT_UNUSABLE"))
+        err = qu.urllib.error.HTTPError("u", 401, "no", {}, None)
+        with mock.patch("query_understanding.urllib.request.urlopen", side_effect=err):
+            self.assertEqual(qu.test_connection(provider), (False, "AUTH_REJECTED"))
+        with mock.patch("query_understanding.urllib.request.urlopen", side_effect=OSError()):
+            self.assertEqual(qu.test_connection(provider), (False, "UNREACHABLE"))
+
+
+class ConfigApiTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.server = ThreadingHTTPServer(("127.0.0.1", 0), web_app.Handler)
+        threading.Thread(target=cls.server.serve_forever, daemon=True).start()
+        cls.base = f"http://127.0.0.1:{cls.server.server_port}"
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server.shutdown()
+        cls.server.server_close()
+
+    def setUp(self):
+        qu.clear_runtime()
+        self.env = mock.patch.dict("os.environ", {}, clear=False)
+        self.env.start()
+        os.environ.pop("AI_API_KEY", None)
+
+    def tearDown(self):
+        qu.clear_runtime()
+        self.env.stop()
+
+    def post(self, path, value, headers=None):
+        req = Request(self.base + path, json.dumps(value).encode(),
+                      {"Content-Type": "application/json", **(headers or {})})
+        try:
+            with urlopen(req, timeout=10) as r:
+                return r.status, r.read().decode()
+        except HTTPError as e:
+            return e.code, e.read().decode()
+
+    def status(self):
+        with urlopen(self.base + "/api/status") as r:
+            return r.read().decode()
+
+    def test_connect_use_disconnect_never_leaks_key(self):
+        transcript = [self.status()]
+        with mock.patch("query_understanding.urllib.request.urlopen", fake_chat(GOOD)):
+            code, body = self.post("/api/ai-config", {"action": "connect", "api_key": SECRET, "model": "m1"})
+            transcript += [body, self.status()]
+            self.assertEqual(code, 200)
+            self.assertEqual(json.loads(body)["test"], "ok")
+            self.assertTrue(json.loads(body)["ai_configured"])  # page reads this name
+            self.assertTrue(json.loads(self.status())["ai_configured"])
+            code, body = self.post("/api/search", {"query": "Embraer EMB-120 serial number 100", "use_ai": True})
+            transcript.append(body)
+            self.assertEqual(json.loads(body)["interpretation"]["source"], "llm_validated")
+            self.assertTrue(json.loads(body)["interpretation"]["sent_to_external_service"])
+        code, body = self.post("/api/ai-config", {"action": "disconnect"})
+        transcript.append(body)
+        self.assertFalse(json.loads(self.status())["ai_configured"])
+        self.assertTrue(all(SECRET not in t for t in transcript))
+
+    def test_failed_test_is_not_saved(self):
+        err = qu.urllib.error.HTTPError("u", 401, "no", {}, None)
+        with mock.patch("query_understanding.urllib.request.urlopen", side_effect=err):
+            code, body = self.post("/api/ai-config", {"action": "connect", "api_key": SECRET})
+        self.assertEqual(json.loads(body)["test"], "failed")
+        self.assertEqual(json.loads(body)["reason"], "AUTH_REJECTED")
+        self.assertFalse(json.loads(self.status())["ai_configured"])
+        self.assertNotIn(SECRET, body)
+
+    def test_bad_input_rejected_without_echo(self):
+        for bad in ({"action": "connect", "api_key": "x"},
+                    {"action": "connect", "api_key": SECRET, "base_url": "http://evil.example.com"},
+                    {"action": "launch"}, []):
+            code, body = self.post("/api/ai-config", bad)
+            self.assertEqual(code, 400)
+            self.assertNotIn(SECRET, body)
+
+    def test_cross_origin_cannot_set_key(self):
+        code, _ = self.post("/api/ai-config", {"action": "connect", "api_key": SECRET},
+                            {"Origin": "https://evil.example.com"})
+        self.assertEqual(code, 403)
+        self.assertFalse(json.loads(self.status())["ai_configured"])
+
+    def test_key_not_written_to_disk(self):
+        with mock.patch("query_understanding.urllib.request.urlopen", fake_chat(GOOD)):
+            self.post("/api/ai-config", {"action": "connect", "api_key": SECRET})
+        import pathlib
+        root = pathlib.Path(__file__).parent
+        for path in root.rglob("*"):
+            if path.is_file() and ".git" not in path.parts and path.suffix in {".py", ".json", ".jsonl", ".md", ".csv", ".sqlite3", ".js", ".html"}:
+                if path.name == "test_query_understanding.py":
+                    continue
+                self.assertNotIn(SECRET.encode(), path.read_bytes(), str(path))
 
 
 if __name__ == "__main__":

@@ -6,7 +6,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from query_understanding import get_provider, interpret
+from query_understanding import (clear_runtime, get_provider, interpret,
+                                 provider_for as openai_provider_for, set_runtime,
+                                 status as ai_status, test_connection,
+                                 validate_settings)
 from search import SearchEngine, build_index
 
 ROOT = Path(__file__).resolve().parent
@@ -35,21 +38,59 @@ class Handler(BaseHTTPRequestHandler):
         if path == '/api/health':
             self.json(200, {'status': 'ok', 'scope': 'LOCAL_DEMO'})
         elif path == '/api/status':
-            self.json(200, {'ai_configured': get_provider() is not None})
+            info = ai_status()
+            # get_provider is the single source of truth, so tests can patch it.
+            info['configured'] = get_provider() is not None
+            self.json(200, {'ai_configured': info['configured'], **info})
         elif path in ASSETS:
             filename, mime = ASSETS[path]
             self.send(200, (ROOT / 'web' / filename).read_bytes(), mime)
         else:
             self.json(404, {'error': 'NOT_FOUND'})
 
-    def do_POST(self):
-        if self.path != '/api/search':
-            return self.json(404, {'error': 'NOT_FOUND'})
-        # No CORS; also reject browser requests initiated from another origin.
+    def origin_ok(self):
+        # No CORS; reject browser requests initiated from another origin.
         origin = self.headers.get('Origin')
         allowed = {f'http://127.0.0.1:{self.server.server_port}',
                    f'http://localhost:{self.server.server_port}'}
-        if origin and origin not in allowed:
+        return not origin or origin in allowed
+
+    def ai_config(self):
+        if not self.origin_ok():
+            return self.json(403, {'error': 'ORIGIN_NOT_ALLOWED'})
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 < length <= 2048:
+                return self.json(413, {'error': 'INVALID_BODY_SIZE'})
+            if self.headers.get_content_type() != 'application/json':
+                return self.json(415, {'error': 'JSON_REQUIRED'})
+            value = json.loads(self.rfile.read(length))
+            if not isinstance(value, dict) or value.get('action') not in ('connect', 'disconnect'):
+                raise ValueError()
+        except (ValueError, UnicodeError):
+            return self.json(400, {'error': 'INVALID_REQUEST'})
+        if value['action'] == 'disconnect':
+            clear_runtime()
+            info = ai_status()
+            return self.json(200, {**info, 'ai_configured': info['configured']})
+        settings, error = validate_settings(
+            value.get('api_key'), value.get('model'), value.get('base_url'))
+        if error:
+            return self.json(400, {'error': error})
+        ok, reason = test_connection(openai_provider_for(settings))
+        if not ok:
+            # A key that failed its test is never kept.
+            return self.json(200, {**ai_status(), 'test': 'failed', 'reason': reason})
+        set_runtime(settings)
+        info = ai_status()
+        self.json(200, {**info, 'ai_configured': info['configured'], 'test': 'ok'})
+
+    def do_POST(self):
+        if self.path == '/api/ai-config':
+            return self.ai_config()
+        if self.path != '/api/search':
+            return self.json(404, {'error': 'NOT_FOUND'})
+        if not self.origin_ok():
             return self.json(403, {'error': 'ORIGIN_NOT_ALLOWED'})
         try:
             length = int(self.headers.get('Content-Length', '0'))

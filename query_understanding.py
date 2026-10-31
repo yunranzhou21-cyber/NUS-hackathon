@@ -11,7 +11,9 @@ Optional environment variables (the key is never written to disk or logs):
 import json
 import os
 import re
+import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from search import IDENTIFIER
@@ -76,12 +78,84 @@ def validate(raw, query):
     return data["intent"], fields, rejected
 
 
+_lock = threading.Lock()
+_runtime = {}  # in memory only; never written to disk, logs, or API responses
+DEFAULT_BASE = "https://api.openai.com/v1"
+DEFAULT_MODEL = "gpt-4o-mini"
+
+
+def validate_settings(api_key, model, base_url):
+    """Return (clean_settings, error_code). Never echoes the key."""
+    if (not isinstance(api_key, str) or not 8 <= len(api_key) <= 300
+            or re.search(r"[\s\x00-\x1f]", api_key)):
+        return None, "INVALID_API_KEY_FORMAT"
+    model = (model or DEFAULT_MODEL).strip()
+    if not re.fullmatch(r"[A-Za-z0-9._:/-]{1,100}", model):
+        return None, "INVALID_MODEL_NAME"
+    base = (base_url or DEFAULT_BASE).strip().rstrip("/")
+    parts = urllib.parse.urlsplit(base)
+    local = parts.hostname in ("127.0.0.1", "localhost")
+    # The key travels to this address, so plain http is allowed only for loopback.
+    if (parts.scheme not in ("https", "http") or (parts.scheme == "http" and not local)
+            or not parts.hostname or parts.username or parts.password
+            or parts.query or parts.fragment):
+        return None, "INVALID_BASE_URL"
+    return {"api_key": api_key, "model": model, "base_url": base}, None
+
+
+def set_runtime(settings):
+    with _lock:
+        _runtime.clear()
+        _runtime.update(settings)
+
+
+def clear_runtime():
+    with _lock:
+        _runtime.clear()
+
+
+def status():
+    """Safe to send to the browser: no key material."""
+    with _lock:
+        if _runtime:
+            return {"configured": True, "source": "session", "model": _runtime["model"],
+                    "host": urllib.parse.urlsplit(_runtime["base_url"]).netloc}
+    if os.environ.get("AI_API_KEY"):
+        return {"configured": True, "source": "environment",
+                "model": os.environ.get("AI_MODEL", DEFAULT_MODEL),
+                "host": urllib.parse.urlsplit(
+                    os.environ.get("AI_BASE_URL", DEFAULT_BASE)).netloc}
+    return {"configured": False, "source": None, "model": None, "host": None}
+
+
+def test_connection(provider):
+    """One tiny call with a fixed harmless question. Returns (ok, reason)."""
+    probe = "EMB-120 serial number 100"
+    try:
+        checked = validate(provider(probe), probe)
+    except urllib.error.HTTPError as exc:
+        return False, "AUTH_REJECTED" if exc.code in (401, 403) else "SERVICE_ERROR"
+    except (OSError, urllib.error.URLError, TimeoutError):
+        return False, "UNREACHABLE"
+    except (KeyError, IndexError, ValueError, TypeError):
+        return False, "UNEXPECTED_RESPONSE"
+    return (True, None) if checked else (False, "MODEL_OUTPUT_UNUSABLE")
+
+
 def openai_compatible_provider():
+    with _lock:
+        runtime = dict(_runtime)
+    if runtime:
+        return provider_for(runtime)
     key = os.environ.get("AI_API_KEY")
     if not key:
         return None
-    base = os.environ.get("AI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-    model = os.environ.get("AI_MODEL", "gpt-4o-mini")
+    return provider_for({"api_key": key, "model": os.environ.get("AI_MODEL", DEFAULT_MODEL),
+                         "base_url": os.environ.get("AI_BASE_URL", DEFAULT_BASE).rstrip("/")})
+
+
+def provider_for(settings):
+    key, base, model = settings["api_key"], settings["base_url"], settings["model"]
 
     def call(query):
         body = json.dumps({

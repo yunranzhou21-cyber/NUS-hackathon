@@ -85,10 +85,41 @@ function render(data) {
  }
  $('raw').textContent=JSON.stringify(data,null,2);$('raw-panel').hidden=false;
 }
-fetch('/api/status').then(r=>r.json()).then(s=>{
- $('use_ai').disabled=!s.ai_configured;$('use_ai').checked=s.ai_configured;
- $('ai-hint').textContent=s.ai_configured?'Only your question is sent to the model. Documents never are.':'Not configured. Set AI_API_KEY and restart to enable. Local rules are used meanwhile.';
-}).catch(()=>{$('ai-hint').textContent='AI status unavailable. Local rules are used.';});
+const failures={
+ AUTH_REJECTED:'The service rejected this key. Nothing was saved.',
+ UNREACHABLE:'Could not reach the endpoint. Nothing was saved.',
+ SERVICE_ERROR:'The service returned an error. Nothing was saved.',
+ UNEXPECTED_RESPONSE:'The endpoint did not respond like an OpenAI-compatible chat API. Nothing was saved.',
+ MODEL_OUTPUT_UNUSABLE:'The model replied, but not in the required format. Nothing was saved.',
+ INVALID_API_KEY_FORMAT:'The key looks malformed (8–300 characters, no spaces).',
+ INVALID_MODEL_NAME:'The model name has unsupported characters.',
+ INVALID_BASE_URL:'The endpoint must be https (http is allowed only for localhost) with no credentials.'
+};
+function applyStatus(s,keepResult){
+ const on=!!(s.ai_configured ?? s.configured), was=$('use_ai').disabled;
+ $('use_ai').disabled=!on; if(on&&was)$('use_ai').checked=true; if(!on)$('use_ai').checked=false;
+ $('ai-disconnect').disabled=!(on&&s.source==='session');
+ $('ai-hint').textContent=on?`AI on · ${s.model} @ ${s.host} · ${s.source==='session'?'key held in memory':'key from environment'}`:'AI off. Add a key under AI settings. Local rules are used meanwhile.';
+ if(!keepResult)$('ai-result').textContent='';
+}
+fetch('/api/status').then(r=>r.json()).then(s=>applyStatus(s)).catch(()=>{$('ai-hint').textContent='AI status unavailable. Local rules are used.';});
+async function aiConfig(body){
+ const r=await fetch('/api/ai-config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ return {ok:r.ok,data:await r.json()};
+}
+$('ai-connect').addEventListener('click',async()=>{
+ const button=$('ai-connect'); button.disabled=true; $('ai-result').textContent='Testing connection…';
+ try{
+  const {ok,data}=await aiConfig({action:'connect',api_key:$('api_key').value.trim(),model:$('ai_model').value.trim(),base_url:$('ai_base').value.trim()});
+  if(!ok){$('ai-result').textContent=failures[data.error]||'Request failed.';return;}
+  if(data.test==='ok'){$('api_key').value='';applyStatus(data,true);$('ai-result').textContent='Connected. The key was cleared from this page.';}
+  else $('ai-result').textContent=failures[data.reason]||'Connection test failed. Nothing was saved.';
+ }catch(_){$('ai-result').textContent='Request failed.';}
+ finally{button.disabled=false;}
+});
+$('ai-disconnect').addEventListener('click',async()=>{
+ const {data}=await aiConfig({action:'disconnect'}); applyStatus(data,true); $('ai-result').textContent='Disconnected. The key was forgotten.';
+});
 let requestNumber=0;
 $('search-form').addEventListener('submit',async event=>{
  event.preventDefault(); const current=++requestNumber;

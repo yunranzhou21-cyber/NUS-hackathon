@@ -14,7 +14,15 @@ Every returned value must appear in the user's own text (case and spacing ignore
 
 The model never judges applicability, never summarizes documents, and never supplies maintenance content. Those steps are unchanged: indexed search, the exact-match rule engine, and verbatim source citations.
 
-## Enable it
+## Enable it from the page
+
+Open **AI settings** in the left panel, paste the key, optionally set the model and endpoint, and press **Connect**. The server first makes one small test call with a fixed harmless question. If the test fails, the key is discarded and the page says why (rejected key, unreachable endpoint, unexpected response, unusable output). On success the key field is cleared and the toggle turns on. **Disconnect** forgets the key.
+
+The key is held in the server process's memory only. It is never written to disk, logged, or returned by any API response, and it is forgotten when the server stops. The endpoint must be https, except plain http is accepted for localhost. Credentials in the URL are refused. Requests from other origins are refused.
+
+## Enable it from the environment
+
+An environment key still works and is used when no key has been entered on the page.
 
 ```powershell
 $env:AI_API_KEY = "your-key"
@@ -31,7 +39,9 @@ Recognizes serial and line numbers, manufacturers that exist in the index, and a
 
 ## Verified
 
-`test_query_understanding.py` (14 tests) covers kept and discarded values, malformed output, unknown intents, provider failures, code-fenced JSON, conflicts between question and form, and end-to-end searches through the HTTP API using a fake model. The suite totals 56 tests.
+`test_query_understanding.py` covers kept and discarded values, malformed output, unknown intents, provider failures, code-fenced JSON, conflicts between question and form, and end-to-end searches through the HTTP API using a fake model. It also covers settings validation, the connection test, saving only after a passing test, cross-origin refusal, and a scan confirming the key appears in no response and no project file. The suite totals 63 tests.
+
+In a real browser, against a local stand-in for a model server, I confirmed: a failed connection saves nothing, a successful one enables the toggle and clears the key field, an invented field is discarded and shown as such, and Disconnect forgets the key. A real hosted model has not been tested.
 
 Not verified: behavior with a real model. Extraction accuracy on real user phrasing has not been measured, and no independent evaluation set exists yet. Test models are scripted, so these tests show the safeguards work, not that a given model extracts well.
 
