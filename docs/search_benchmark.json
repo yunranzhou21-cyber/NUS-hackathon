@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-31T11:05:50",
+  "corpus": {
+    "records": 431,
+    "passages": 1552,
+    "database": "data\\search\\search.sqlite3"
+  },
+  "build_ms": 262.256,
+  "warm_search": {
+    "samples": 100,
+    "p50_ms": 189.349,
+    "p95_ms": 208.772,
+    "max_ms": 226.252
+  },
+  "open_and_search": {
+    "samples": 5,
+    "p50_ms": 186.905,
+    "p95_ms": 203.214,
+    "max_ms": 203.214
+  },
+  "samples": [
+    {
+      "query": "EMB-120 序列号 120006 有哪些相关提案",
+      "status": "EVIDENCE_FOUND",
+      "record_ids": [
+        "row-0383",
+        "row-0294"
+      ]
+    },
+    {
+      "query": "corrosion",
+      "status": "EVIDENCE_FOUND",
+      "record_ids": [
+        "row-0140",
+        "row-0170",
+        "row-0038",
+        "row-0106",
+        "row-0129"
+      ]
+    },
+    {
+      "query": "777",
+      "status": "EVIDENCE_FOUND",
+      "record_ids": [
+        "row-0400",
+        "row-0331",
+        "row-0288"
+      ]
+    },
+    {
+      "query": "2000-NM-120-AD",
+      "status": "EVIDENCE_FOUND",
+      "record_ids": [
+        "row-0294"
+      ]
+    },
+    {
+      "query": "zzzzUnlistedModel999",
+      "status": "REFUSE",
+      "record_ids": []
+    }
+  ],
+  "verified_1000_page_requirement": false,
+  "limitations": "Single machine, sequential runs, actual CSV only; open-and-search is not OS cold-cache measurement. No network, UI, generation, or semantic recall evaluation."
+}

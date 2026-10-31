@@ -1,0 +1,7 @@
+# Preserve byte-stable source data and citation hashes across Windows checkouts.
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.csv -text
