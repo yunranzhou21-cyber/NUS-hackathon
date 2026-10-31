@@ -172,8 +172,13 @@ def in_ranges(value, ranges):
     return any(lo <= value <= hi for lo, hi in ranges)
 
 
-def evaluate(parsed, configuration):
-    """Decision refers only to the quoted proposed scope, NOT legal applicability."""
+def evaluate(parsed, configuration, allow_historical=False):
+    """Decision refers only to the quoted proposed scope, NOT legal applicability.
+
+    allow_historical: compare the text of a proposal that is NOT the latest record for
+    its docket (for example one a later record withdrew). Off by default. When on,
+    the result is labeled as historical text only.
+    """
     answer = {
         "record_id": parsed["record_id"], "docket": parsed["docket"],
         "status": "NEEDS_CLARIFICATION",
@@ -198,25 +203,31 @@ def evaluate(parsed, configuration):
 
     if parsed["document_kind"] not in ("proposal", "supplemental_or_revised_proposal"):
         return stop("DOCUMENT_KIND_NOT_CONFIRMED_PROPOSAL")
-    if not parsed["dataset_history"]["is_latest_observed"]:
+    historical = not parsed["dataset_history"]["is_latest_observed"]
+    if historical and not allow_historical:
         return stop("NOT_LATEST_OBSERVED_RECORD_IN_CSV")
     if parsed["parse_status"] != "SUPPORTED_TEXT_GRAMMAR":
         answer["reason_codes"].extend(parsed["reasons"])
         return stop("APPLICABILITY_NOT_FULLY_PARSED")
-    if not parsed["make"]:
-        return stop("SOURCE_MAKE_MISSING")
-    missing = [field for field in ("make", "model") if not configuration.get(field)]
-    if missing:
-        answer["missing_fields"] = missing
+    if not configuration.get("model"):
+        answer["missing_fields"] = ["model"]
         return stop("CONFIGURATION_INCOMPLETE", "NEEDS_CLARIFICATION")
-    make_match = make_value(configuration["make"]) == parsed["make"]
-    answer["checks"].append({
-        "field": "make", "result": "MATCH" if make_match else "NO_MATCH",
-        "evidence": parsed["make_evidence"],
-    })
-    if not make_match:
-        # Different spellings may be unregistered aliases, not another manufacturer.
-        return stop("MAKE_MISMATCH_OR_UNREGISTERED_ALIAS", "NEEDS_CLARIFICATION")
+    if configuration.get("make"):
+        if not parsed["make"]:
+            return stop("SOURCE_MAKE_MISSING")
+        make_match = make_value(configuration["make"]) == parsed["make"]
+        answer["checks"].append({
+            "field": "make", "result": "MATCH" if make_match else "NO_MATCH",
+            "evidence": parsed["make_evidence"],
+        })
+        if not make_match:
+            # Different spellings may be unregistered aliases, not another manufacturer.
+            return stop("MAKE_MISMATCH_OR_UNREGISTERED_ALIAS", "NEEDS_CLARIFICATION")
+    else:
+        # The exact model token below is still required, so the manufacturer adds little.
+        answer["checks"].append({
+            "field": "make", "result": "NOT_PROVIDED",
+            "note": "Manufacturer not provided. The exact model name was matched instead."})
     rule = parsed["rule"]
     model_match = normalize_model(configuration["model"]) in rule["models"]
     answer["checks"].append({
@@ -246,8 +257,13 @@ def evaluate(parsed, configuration):
     else:
         decision = "MATCH"
     answer["scope_decision"] = decision
-    answer["status"] = "TEXT_SCOPE_COMPARISON_ONLY"
-    answer["reason_codes"] = ["PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"]
+    if historical:
+        answer["status"] = "HISTORICAL_TEXT_SCOPE_ONLY"
+        answer["reason_codes"] = ["HISTORICAL_PROPOSAL_TEXT_ONLY_NOT_CURRENT"]
+        answer["historical_text_only"] = True
+    else:
+        answer["status"] = "TEXT_SCOPE_COMPARISON_ONLY"
+        answer["reason_codes"] = ["PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"]
     return answer
 
 

@@ -115,7 +115,8 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, UnicodeError):
             return self.json(400, {'error': 'INVALID_REQUEST'})
         use_ai = value.get('use_ai', False)
-        if type(use_ai) is not bool:
+        historical = value.get('historical_comparison', False)
+        if type(use_ai) is not bool or type(historical) is not bool:
             return self.json(400, {'error': 'INVALID_REQUEST'})
         engine = None
         try:
@@ -140,7 +141,7 @@ class Handler(BaseHTTPRequestHandler):
                     config[key] = found
             if interpretation['intent'] == 'find_history':
                 history = True
-            result = engine.search(query, config, limit, history)
+            result = engine.search(query, config, limit, history, historical)
             result['interpretation'] = interpretation
             self.json(200, result)
         except (ValueError, sqlite3.Error, OSError):

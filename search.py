@@ -21,6 +21,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
+from answerability import assess
 from applicability import evaluate, load_records, normalize_model, parse_record
 from prepare_data import make_value
 
@@ -332,7 +333,8 @@ class SearchEngine:
         return evidence
 
     # ---- public ---------------------------------------------------------
-    def search(self, query, configuration=None, limit=5, include_history=False):
+    def search(self, query, configuration=None, limit=5, include_history=False,
+               historical_comparison=False):
         started = time.perf_counter()
         response = {
             "status": "REFUSE", "query": query, "results": [],
@@ -404,13 +406,25 @@ class SearchEngine:
                     "versions_in_csv": len(versions),
                     "this_is_latest": parsed["dataset_history"]["is_latest_observed"],
                     "versions": versions,
+                    "supersession_mentions": [
+                        {**m["evidence"], "kind": m["kind"], "source": rec["source"]}
+                        for m in rec["extracted"]["revision_mentions"]
+                        if m["kind"] in ("proposed_supersession", "supersession_mention_unverified")],
                     "note": "Latest means latest in this CSV, not a verified legal version."},
+                # False for summary-only records: they hold no procedural text to quote.
+                "full_text_available": bool(rec["extracted"]["proposed_text"]),
                 "score_is_probability": False,
                 "evidence": self._evidence_for(rec, passages),
-                "configuration_check": evaluate(parsed, config),
+                "configuration_check": evaluate(parsed, config, historical_comparison),
             })
         response["status"] = "EVIDENCE_FOUND" if hits else "REFUSE"
         response["reason_codes"] = ([] if hits else ["NO_EVIDENCE_FOR_QUERY_AND_FILTERS"])
+        response["historical_comparison"] = historical_comparison
+        response["answerability"] = assess(query, response["results"])
+        if response["answerability"]["unmet_requests"]:
+            # Records were found, but they cannot answer what was asked. Say so explicitly.
+            response["status"] = "INSUFFICIENT_EVIDENCE"
+            response["reason_codes"] = [u["code"] for u in response["answerability"]["unmet_requests"]]
         response["result_limit"] = limit
         response["not_exhaustive"] = True
         return finish()

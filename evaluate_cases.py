@@ -22,7 +22,9 @@ from applicability import evaluate, load_records, parse_record
 CASES = "eval/airbus_q4_test_cases.jsonl"
 SUPPORTED = ("make", "model", "serial_number", "line_number")
 DEFINITIVE = ("MATCH", "NO_MATCH")
-DECLINES = ("REFUSE", "NEEDS_CLARIFICATION")
+# INSUFFICIENT_EVIDENCE was added with the answerability check: an explicit statement
+# that records were found but cannot answer. It is an explicit decline like the others.
+DECLINES = ("REFUSE", "NEEDS_CLARIFICATION", "INSUFFICIENT_EVIDENCE")
 
 
 def load_cases(path):
@@ -138,6 +140,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", default=CASES)
     parser.add_argument("--out", default="eval/results.json")
+    parser.add_argument("--historical", action="store_true",
+                        help="send historical_comparison=true (explicit mode for superseded proposals)")
     args = parser.parse_args()
     cases = load_cases(args.cases)
     server = ThreadingHTTPServer(("127.0.0.1", 0), web_app.Handler)
@@ -147,7 +151,8 @@ def main():
     try:
         for case in cases:
             used, dropped = split_config(case["configuration"])
-            response = post(base, {"query": case["query"], "configuration": used, "limit": 5})
+            response = post(base, {"query": case["query"], "configuration": used, "limit": 5,
+                                   "historical_comparison": args.historical})
             outcome, detail = score_case(case, response)
             latencies.append(response["retrieval_ms"])
             rows.append({"test_id": case["test_id"], "category": case["category"],

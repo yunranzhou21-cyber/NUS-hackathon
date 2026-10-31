@@ -68,6 +68,10 @@ class ValidationTests(unittest.TestCase):
         self.assertNotIn("make", rules_interpret("Cessna 172 inspection", makes)["fields"])
         self.assertNotIn("make", rules_interpret("Boeingly speaking", makes)["fields"])
 
+    def test_asking_about_status_is_not_a_history_request(self):
+        self.assertNotEqual(rules_interpret("Has AD 2025-09-07 been superseded?")["intent"], "find_history")
+        self.assertEqual(rules_interpret("show previous versions")["intent"], "find_history")
+
     def test_local_only_never_marked_external(self):
         r = interpret(Q)
         self.assertFalse(r["sent_to_external_service"])

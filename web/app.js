@@ -13,6 +13,12 @@ const reasons = {
  MULTIPLE_MODELS_NEED_CLARIFICATION:'Multiple models detected. Search one model at a time.',
  MAKE_MISMATCH_OR_UNREGISTERED_ALIAS:'The manufacturer differs or its alias is not registered.',
  SEARCH_TERMS_REQUIRED:'Enter a model or meaningful keywords.',
+ HISTORICAL_PROPOSAL_TEXT_ONLY_NOT_CURRENT:'Historical text only. This proposal is not the latest record for its docket, so this is not a current scope.',
+ EXACT_PAGE_UNAVAILABLE:'Exact page not available.',
+ OPERATIONAL_DECISION_OUT_OF_SCOPE:'Compliance or release decisions are outside what these records can support.',
+ REQUESTED_VALUE_NOT_IN_RECORD:'The requested value is not in the record.',
+ PROCEDURE_NOT_IN_RECORD:'The procedure is not in the record.',
+ EFFECTIVE_STATUS_NOT_ESTABLISHED:'No effective rule is established by these records.',
  IDENTIFIER_NOT_FOUND:'That identifier is not in the supplied data. No similar search was substituted.',
  IDENTIFIER_MUST_BE_NUMERIC:'This rule supports numeric identifiers only.',
  CONFLICTING_IDENTIFIERS:'Conflicting identifiers detected. Please clarify.',
@@ -44,7 +50,19 @@ function evidence(parent, ev, fallback) {
 function render(data) {
  $('results').replaceChildren();$('summary').replaceChildren();
  const titles={EVIDENCE_FOUND:'Candidate evidence found',REFUSE:'Unable to provide a reliable answer',NEEDS_CLARIFICATION:'Query needs clarification'};
+ titles.INSUFFICIENT_EVIDENCE='Record found, but it cannot answer this';
  $('summary').append(node('h2',titles[data.status] || 'Search complete'));
+ if(data.answerability && data.answerability.unmet_requests.length){
+  const box=node('div',undefined,'interp');
+  box.append(node('strong','What these records cannot tell you'));
+  for(const u of data.answerability.unmet_requests){
+   box.append(node('p',`You asked about: “${u.asked}”`,'meta'));
+   box.append(node('p',u.explanation));
+   for(const ev of u.evidence || [])evidence(box,ev);
+  }
+  box.append(node('p','The matching record is shown below. Nothing was filled in from outside the supplied data.','meta'));
+  $('summary').append(box);
+ }
  $('summary').append(node('p',`${data.results.length} results returned · Retrieval ${data.retrieval_ms} ms · Not exhaustive`));
  for(const code of data.reason_codes || [])$('summary').append(node('p',reasons[code] || code));
  if(data.interpretation){
@@ -143,7 +161,7 @@ $('search-form').addEventListener('submit',async event=>{
  $('results').replaceChildren();$('raw-panel').hidden=true;
  $('summary').replaceChildren(node('h2','Searching source evidence…'));
  try{
-  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked,use_ai:$('use_ai').checked})});
+  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked,historical_comparison:$('historical').checked,use_ai:$('use_ai').checked})});
   const data=await response.json();if(!response.ok)throw new Error(data.error==='INDEX_UNAVAILABLE'?'Search index unavailable. Run python search.py build.':'Request failed. Check your inputs and try again.');
   if(current===requestNumber)render(data);
  }catch(error){if(current===requestNumber)$('summary').replaceChildren(node('h2','Search could not complete'),node('p',error.message));}
