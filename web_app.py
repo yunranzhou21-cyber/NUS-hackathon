@@ -160,8 +160,13 @@ def main():
     parser.add_argument('--port', type=int, default=8000)
     args = parser.parse_args()
     database = ROOT / 'data/search/search.sqlite3'
-    if not database.exists():
-        build_index(str(ROOT / 'data/processed/records.jsonl'), str(database))
+    source = str(ROOT / 'data/processed/records.jsonl')
+    try:
+        SearchEngine(source, str(database)).close()
+    except ValueError:
+        # Missing or stale (schema or data changed): rebuild instead of failing every request.
+        print('Search index missing or stale. Rebuilding…', flush=True)
+        build_index(source, str(database))
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     print(f'Local demo: http://127.0.0.1:{args.port}', flush=True)
     try:

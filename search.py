@@ -1,10 +1,24 @@
-"""Local evidence search with SQLite FTS5 and conservative configuration checks."""
+"""Local evidence search with SQLite FTS5 and conservative configuration checks.
+
+Two routes, chosen from the question:
+* DOCKET_LOOKUP: the question names a docket that exists in the index. All versions
+  of that docket are returned, newest first. Make/model do not hide the record,
+  because the user named it; the configuration check decides what can be said.
+* KEYWORD_COVERAGE: otherwise, ranked BM25 over passages, but a passage is only a
+  hit when it covers at least COVERAGE_MIN of the meaningful question terms.
+  That threshold is the safety valve: without it, OR matching would return
+  unrelated documents.
+A docket-shaped identifier that is not in the index is refused, never replaced by
+a similar-looking search.
+"""
 import argparse
 import hashlib
 import json
+import math
 import re
 import sqlite3
 import time
+from collections import defaultdict
 from pathlib import Path
 
 from applicability import evaluate, load_records, normalize_model, parse_record
@@ -12,9 +26,12 @@ from prepare_data import make_value
 
 INPUT = "data/processed/records.jsonl"
 DATABASE = "data/search/search.sqlite3"
-SCHEMA_VERSION = "1"
+SCHEMA_VERSION = "2"
+COVERAGE_MIN = 0.6
 FIELDS = ("Subject Heading", "Summary", "Comments",
           "Link for Submitting Public Comment")
+FIELD_PRIORITY = {"Summary": 0, "Comments": 1, "Subject Heading": 2,
+                  "Link for Submitting Public Comment": 3}
 STOPWORDS = set("""
 the a an of for to in on and or with is are does do which what how find show
 me about related applicable apply applies serial number numbers model engine
@@ -23,6 +40,8 @@ proposals proposal nprm sn
 my our your i we it its this that these those be been can could should would
 need needs any there by at from has have affect affected affects cover covers
 covered include included including
+match matches matched stated summary evidence active record records give using
+based whether prove confirm establish enough alone exact
 """.split())
 CHINESE_INTENTS = (
     "有哪些相关提案", "有哪些相关规定", "有哪些相关指令", "有哪些", "查找",
@@ -33,11 +52,17 @@ TRANSLATIONS = {
     "腐蚀": "corrosion", "裂纹": "crack", "检查": "inspection",
     "撤回": "withdraw", "燃油": "fuel",
 }
+VALUE = r"(?:is\s+)?[:：#=]?\s*([A-Za-z]*\d[A-Za-z0-9-]*)"  # must contain a digit
 IDENTIFIER = re.compile(
-    r"(?:序列号|serial\s+(?:number|no\.?)|s/n)\s*[:：#]?\s*([A-Za-z0-9-]+)"
-    r"|(?:生产线号|line\s+(?:number|no\.?)|l/n)\s*[:：#]?\s*([A-Za-z0-9-]+)",
+    r"(?:序列号|(?<![A-Za-z])serial(?:\s+(?:numbers?|no\.?))?|(?<![A-Za-z])s/n)\s*" + VALUE
+    + r"|(?:生产线号|(?<![A-Za-z])line\s+(?:numbers?|no\.?)|(?<![A-Za-z])l/n)\s*" + VALUE,
     re.I,
 )
+# Shape only: used to catch identifiers that LOOK like dockets but are not indexed.
+DOCKET_SHAPE = re.compile(
+    r"(?<![A-Za-z0-9-])(?:FAA-\d{4}-\d+(?:R\d+)?|\d{2,4}-[A-Z]{2,4}-\d+-AD)(?:-[A-Z])?(?![A-Za-z0-9_-])",
+    re.I)
+AD_REFERENCE = re.compile(r"(?<![A-Za-z0-9-])(\d{4}-\d{2}-\d{2})(?![A-Za-z0-9-])")
 
 
 def input_hash(path):
@@ -68,8 +93,10 @@ def build_index(input_path=INPUT, database=DATABASE):
             CREATE TABLE manifest (key TEXT PRIMARY KEY, value TEXT NOT NULL);
             CREATE TABLE documents (
                 id TEXT PRIMARY KEY, make TEXT, latest INTEGER NOT NULL,
+                docket TEXT NOT NULL, pub_date TEXT, kind TEXT,
                 record_json TEXT NOT NULL, parsed_json TEXT NOT NULL
             );
+            CREATE INDEX document_docket ON documents(docket);
             CREATE TABLE models (
                 doc_id TEXT NOT NULL, value TEXT NOT NULL,
                 PRIMARY KEY(doc_id, value)
@@ -77,15 +104,17 @@ def build_index(input_path=INPUT, database=DATABASE):
             CREATE INDEX model_value ON models(value);
             CREATE VIRTUAL TABLE passages USING fts5(
                 doc_id UNINDEXED, field UNINDEXED, start UNINDEXED, end UNINDEXED,
-                content, identifiers, tokenize='unicode61'
+                content, identifiers, tokenize='porter unicode61'
             );
         """)
         for rec in records:
             parsed = parse_record(rec)
             connection.execute(
-                "INSERT INTO documents VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO documents VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (rec["record_id"], rec["normalized"]["make"],
                  int(rec["dataset_history"]["is_latest_observed"]),
+                 rec["normalized"]["docket"], rec["normalized"]["publication_date"],
+                 rec["normalized"]["document_kind"],
                  json.dumps(rec, ensure_ascii=False),
                  json.dumps(parsed, ensure_ascii=False)),
             )
@@ -133,23 +162,41 @@ def quote_fts(value):
     return '"' + value.replace('"', '""') + '"'
 
 
-def query_plan(query, configuration, known_models):
-    """Recognize a small explicit vocabulary; refuse unexplained Chinese terms."""
+def extract_dockets(text, known_dockets):
+    """Return (canonical known dockets, unknown docket-shaped strings, remaining text)."""
+    found, remaining = [], text
+    # Longest first so "X-W" is taken before "X".
+    for docket in sorted(known_dockets, key=lambda d: (-len(d), d)):
+        pattern = re.compile(r"(?<![A-Za-z0-9_-])" + re.escape(docket) + r"(?![A-Za-z0-9_-])", re.I)
+        if pattern.search(remaining):
+            found.append(docket)
+            remaining = pattern.sub(" ", remaining)
+    unknown = []
+    for match in DOCKET_SHAPE.finditer(remaining):
+        unknown.append(match.group(0))
+    remaining = DOCKET_SHAPE.sub(" ", remaining)
+    return found, unknown, remaining
+
+
+def query_plan(query, configuration, known_models, known_dockets=()):
+    """Recognize identifiers and a small explicit vocabulary; refuse unexplained Chinese terms."""
     config = {k: str(v).strip() for k, v in configuration.items()
               if v is not None and str(v).strip()}
     inferred = {}
-    remaining = query
     for match in IDENTIFIER.finditer(query):
         field = "serial_number" if match[1] else "line_number"
         value = match[1] or match[2]
         if field in inferred and inferred[field] != value:
             return None, "CONFLICTING_IDENTIFIERS"
         inferred[field] = value
-    remaining = IDENTIFIER.sub(" ", remaining)
+    remaining = IDENTIFIER.sub(" ", query)
     for field, value in inferred.items():
         if field in config and config[field] != value:
             return None, "QUERY_CONFIGURATION_CONFLICT"
         config[field] = value
+    dockets, unknown, remaining = extract_dockets(remaining, known_dockets)
+    ad_references = list(dict.fromkeys(AD_REFERENCE.findall(remaining)))
+    remaining = AD_REFERENCE.sub(" ", remaining)
     # Longer models first prevent treating A330 inside A330-941 as a second model.
     found = []
     for model in sorted(known_models, key=lambda x: (-len(x), x)):
@@ -180,12 +227,19 @@ def query_plan(query, configuration, known_models):
         return None, "QUERY_TOO_COMPLEX"
     if config.get("model"):
         terms.insert(0, normalize_model(config["model"]))
-    if not terms:
+    # An AD number named in the question must appear in the passage.
+    required = list(ad_references)
+    terms = list(dict.fromkeys(required + terms))
+    if not terms and not dockets and not unknown:
         return None, "SEARCH_TERMS_REQUIRED"
     return {
         "configuration": config,
         "lexical_terms": terms,
-        "fts_expression": " AND ".join(quote_fts(term) for term in terms),
+        "required_terms": required,
+        "identifiers": {"dockets": dockets, "ad_references": ad_references,
+                        "unknown": unknown},
+        "fts_expression": " OR ".join(quote_fts(term) for term in terms),
+        "coverage_min": COVERAGE_MIN,
         "mode": "LIMITED_BILINGUAL_LEXICAL_SEARCH",
     }, None
 
@@ -206,6 +260,8 @@ class SearchEngine:
                 "SELECT DISTINCT value FROM models")]
             self.makes = [r[0] for r in self.connection.execute(
                 "SELECT DISTINCT make FROM documents WHERE make IS NOT NULL")]
+            self.dockets = [r[0] for r in self.connection.execute(
+                "SELECT DISTINCT docket FROM documents")]
         except Exception:
             self.connection.close()
             raise
@@ -213,6 +269,69 @@ class SearchEngine:
     def close(self):
         self.connection.close()
 
+    # ---- routes ---------------------------------------------------------
+    def _docket_hits(self, dockets, limit):
+        hits = []
+        for docket in dockets:
+            rows = self.connection.execute(
+                "SELECT id FROM documents WHERE docket=? "
+                "ORDER BY latest DESC, pub_date DESC, id", (docket,)).fetchall()
+            hits.extend(r[0] for r in rows)
+        return hits[:limit]
+
+    def _keyword_hits(self, plan, limit, include_history):
+        terms, required = plan["lexical_terms"], plan["required_terms"]
+        config = plan["configuration"]
+        where, params = [], []
+        if not include_history:
+            where.append("d.latest = 1")
+        if config.get("make"):
+            where.append("d.make = ?")
+            params.append(make_value(config["make"]))
+        if config.get("model"):
+            where.append("EXISTS (SELECT 1 FROM models m WHERE m.doc_id=d.id AND m.value=?)")
+            params.append(normalize_model(config["model"]))
+        extra = (" AND " + " AND ".join(where)) if where else ""
+        base = "FROM passages JOIN documents d ON d.id=passages.doc_id WHERE passages MATCH ?"
+        term_rows = {}
+        for term in terms:
+            rows = self.connection.execute(
+                "SELECT passages.rowid " + base + extra, [quote_fts(term), *params])
+            term_rows[term] = {r[0] for r in rows}
+        rows = self.connection.execute(
+            "WITH ranked AS MATERIALIZED (SELECT passages.rowid AS rid, passages.doc_id AS doc_id, "
+            "passages.field AS field, passages.start AS start, passages.end AS end, "
+            "passages.content AS content, bm25(passages, 0, 0, 0, 0, 1, 0.25) AS score "
+            + base + extra + ") SELECT * FROM ranked",
+            [plan["fts_expression"], *params]).fetchall()
+        need = max(1, math.ceil(COVERAGE_MIN * len(terms)))
+        by_doc = defaultdict(list)
+        for row in rows:
+            matched = [t for t in terms if row["rid"] in term_rows[t]]
+            if any(t not in matched for t in required) or len(matched) < need:
+                continue
+            by_doc[row["doc_id"]].append((-len(matched), row["score"], row["field"],
+                                          row["start"], row["end"], row["content"], matched))
+        ranked = sorted(by_doc.items(), key=lambda kv: (min(kv[1])[:2], kv[0]))
+        return [(doc, sorted(passages)[:3]) for doc, passages in ranked[:limit]]
+
+    def _versions(self, docket):
+        rows = self.connection.execute(
+            "SELECT id, pub_date, kind, latest FROM documents WHERE docket=? "
+            "ORDER BY latest DESC, pub_date DESC, id", (docket,)).fetchall()
+        return [{"record_id": r[0], "publication_date": r[1], "document_kind": r[2],
+                 "is_latest": bool(r[3])} for r in rows]
+
+    def _evidence_for(self, rec, passages):
+        evidence = []
+        for field, start, end, content in passages:
+            if rec["raw"][field][start:end] != content:
+                raise ValueError("Stored search citation does not match source")
+            evidence.append({"field": field, "start": start, "end": end,
+                             "quote": content, "source": rec["source"]})
+        return evidence
+
+    # ---- public ---------------------------------------------------------
     def search(self, query, configuration=None, limit=5, include_history=False):
         started = time.perf_counter()
         response = {
@@ -230,65 +349,64 @@ class SearchEngine:
         if not isinstance(query, str) or len(query) > 1000 or not 1 <= limit <= 20:
             response["reason_codes"] = ["INVALID_QUERY_OR_LIMIT"]
             return finish()
-        plan, error = query_plan(query, configuration or {}, self.models)
+        plan, error = query_plan(query, configuration or {}, self.models, self.dockets)
         if error:
             response["reason_codes"] = [error]
             response["status"] = "NEEDS_CLARIFICATION"
             return finish()
         response["query_plan"] = plan
-        where = ["passages MATCH ?"]
-        params = [plan["fts_expression"]]
-        config = plan["configuration"]
-        if not include_history:
-            where.append("d.latest = 1")
-        if config.get("make"):
-            where.append("d.make = ?")
-            params.append(make_value(config["make"]))
-        if config.get("model"):
-            where.append("EXISTS (SELECT 1 FROM models m WHERE m.doc_id=d.id AND m.value=?)")
-            params.append(normalize_model(config["model"]))
-        # SQL groups ranked passages into distinct documents without arbitrary hit caps.
-        sql = """
-            WITH ranked AS MATERIALIZED (
-                SELECT passages.doc_id, passages.field, passages.start, passages.end,
-                       passages.content, bm25(passages, 0, 0, 0, 0, 1, 0.25) AS score
-                FROM passages JOIN documents d ON d.id=passages.doc_id
-                WHERE """ + " AND ".join(where) + """
-            )
-            SELECT doc_id, min(score) AS best_score FROM ranked
-            GROUP BY doc_id ORDER BY best_score, doc_id LIMIT ?
-        """
-        hits = self.connection.execute(sql, [*params, limit]).fetchall()
-        for hit in hits:
+        config, ids = plan["configuration"], plan["identifiers"]
+        if ids["unknown"]:
+            # Never substitute a similar-looking search for an identifier that is not indexed.
+            response["reason_codes"] = ["IDENTIFIER_NOT_FOUND"]
+            response["unknown_identifiers"] = [
+                {"value": value, "did_you_mean": [d for d in self.dockets
+                                                  if d.lower().startswith(value.lower())][:5]}
+                for value in ids["unknown"]]
+            return finish()
+        if ids["dockets"]:
+            response["route"] = "DOCKET_LOOKUP"
+            hits = [(doc, None) for doc in self._docket_hits(ids["dockets"], limit)]
+        else:
+            response["route"] = "KEYWORD_COVERAGE"
+            hits = self._keyword_hits(plan, limit, include_history) if plan["lexical_terms"] else []
+        terms = plan["lexical_terms"]
+        for doc_id, ranked_passages in hits:
             doc = self.connection.execute(
-                "SELECT record_json, parsed_json FROM documents WHERE id=?",
-                (hit["doc_id"],)).fetchone()
+                "SELECT record_json, parsed_json FROM documents WHERE id=?", (doc_id,)).fetchone()
             rec, parsed = json.loads(doc[0]), json.loads(doc[1])
-            passages = self.connection.execute("""
-                SELECT field, start, end, content,
-                       bm25(passages, 0, 0, 0, 0, 1, 0.25) AS score
-                FROM passages WHERE passages MATCH ? AND doc_id=?
-                ORDER BY score, rowid LIMIT 3
-            """, (plan["fts_expression"], hit["doc_id"])).fetchall()
-            evidence = []
-            for passage in passages:
-                field, start, end = passage["field"], int(passage["start"]), int(passage["end"])
-                quote = passage["content"]
-                if rec["raw"][field][start:end] != quote:
-                    raise ValueError("Stored search citation does not match source")
-                evidence.append({
-                    "field": field, "start": start, "end": end, "quote": quote,
-                    "source": rec["source"],
-                })
+            if ranked_passages is None:
+                rows = self.connection.execute(
+                    "SELECT field, start, end, content FROM passages WHERE doc_id=?",
+                    (doc_id,)).fetchall()
+                def overlap(row):
+                    text = row["content"].lower()
+                    return -sum(t.lower() in text for t in terms)
+                rows = sorted(rows, key=lambda r: (overlap(r), FIELD_PRIORITY[r["field"]], r["start"]))[:3]
+                passages = [(r["field"], r["start"], r["end"], r["content"]) for r in rows]
+                text = " ".join(p[3] for p in passages).lower()
+                matched = [t for t in terms if t.lower() in text]
+            else:
+                passages = [(p[2], p[3], p[4], p[5]) for p in ranked_passages]
+                matched = ranked_passages[0][6]
+            missing = [t for t in terms if t not in matched]
             title = rec["raw"]["Subject Heading"]
+            versions = self._versions(rec["normalized"]["docket"])
             response["results"].append({
                 "record_id": rec["record_id"], "docket": parsed["docket"],
                 "title": {"text": title, "evidence": {
                     "field": "Subject Heading", "start": 0, "end": len(title),
                     "quote": title, "source": rec["source"]}},
-                "rank_score": hit["best_score"],
+                "match": {"via": response["route"],
+                          "matched_terms": matched, "unmatched_terms": missing,
+                          "term_coverage": round(len(matched) / len(terms), 2) if terms else None},
+                "revision": {
+                    "versions_in_csv": len(versions),
+                    "this_is_latest": parsed["dataset_history"]["is_latest_observed"],
+                    "versions": versions,
+                    "note": "Latest means latest in this CSV, not a verified legal version."},
                 "score_is_probability": False,
-                "evidence": evidence,
+                "evidence": self._evidence_for(rec, passages),
                 "configuration_check": evaluate(parsed, config),
             })
         response["status"] = "EVIDENCE_FOUND" if hits else "REFUSE"

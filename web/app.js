@@ -13,6 +13,7 @@ const reasons = {
  MULTIPLE_MODELS_NEED_CLARIFICATION:'Multiple models detected. Search one model at a time.',
  MAKE_MISMATCH_OR_UNREGISTERED_ALIAS:'The manufacturer differs or its alias is not registered.',
  SEARCH_TERMS_REQUIRED:'Enter a model or meaningful keywords.',
+ IDENTIFIER_NOT_FOUND:'That identifier is not in the supplied data. No similar search was substituted.',
  IDENTIFIER_MUST_BE_NUMERIC:'This rule supports numeric identifiers only.',
  CONFLICTING_IDENTIFIERS:'Conflicting identifiers detected. Please clarify.',
  QUERY_TOO_COMPLEX:'Use a shorter query with fewer keywords.',
@@ -61,6 +62,7 @@ function render(data) {
   box.append(node('p',i.sent_to_external_service?'Only your question text was sent to the model. No documents were sent.':'Processed locally. Nothing left this machine.','meta'));
   $('summary').append(box);
  }
+ for(const u of data.unknown_identifiers || [])$('summary').append(node('p',`“${u.value}” was not found.${u.did_you_mean.length?' Did you mean: '+u.did_you_mean.join(', ')+'?':''}`,'reason'));
  if(data.query_plan)$('summary').append(node('p',`Parsed configuration: ${JSON.stringify(data.query_plan.configuration)} · Keywords: ${data.query_plan.lexical_terms.join(' / ')}`));
  const kinds={proposal:'Proposed rule',withdrawal_notice:'Withdrawal notice',supplemental_or_revised_proposal:'Supplemental / revised proposal',needs_review:'Document type needs review',unknown:'Unknown document type'};
  for(const item of data.results){
@@ -73,8 +75,21 @@ function render(data) {
   for(const code of check.reason_codes)decision.append(node('p',reasons[code] || code,'reason'));
   if(check.missing_fields)decision.append(node('p',`Required fields: ${check.missing_fields.join(' / ')}`));
   card.append(decision);
-  const history=check.dataset_history;
-  card.append(node('p',`Latest observed in CSV: ${history.latest_observed_publication_date || 'Unknown'} · ${history.same_docket_record_ids.length} records for this docket · ${history.is_latest_observed?'Latest observation':'Historical record'} (not a verified legal version)`,'meta'));
+  const rev=item.revision;
+  if(rev && !rev.this_is_latest){
+   const newer=rev.versions.find(v=>v.is_latest);
+   card.append(node('p',`A newer record exists for this docket: ${newer.record_id} (${newer.publication_date || 'date unknown'}, ${kinds[newer.document_kind] || newer.document_kind}). This one is a historical version.`,'reason'));
+  }
+  if(rev && rev.versions_in_csv>1){
+   const list=detail(card,`Versions of ${item.docket} in this CSV (${rev.versions_in_csv})`);
+   for(const v of rev.versions)list.append(node('p',`${v.record_id} · ${v.publication_date || 'date unknown'} · ${kinds[v.document_kind] || v.document_kind}${v.is_latest?' · latest in this CSV':''}${v.record_id===item.record_id?' · (this result)':''}`,'meta'));
+   list.append(node('p',rev.note,'meta'));
+  }else if(rev){
+   card.append(node('p','Only one version of this docket is in the CSV. Latest means latest in this CSV, not a verified legal version.','meta'));
+  }
+  if(item.match && item.match.matched_terms.length){
+   card.append(node('p',`Matched: ${item.match.matched_terms.join(', ')}${item.match.unmatched_terms.length?' · Not found in the shown text: '+item.match.unmatched_terms.join(', '):''}`,'meta'));
+  }
   const checks=detail(card,'Configuration checks & supporting evidence');
   for(const c of check.checks){checks.append(node('p',`${c.field}: ${c.result || (c.included && !c.excluded?'Within range':'Outside range or excluded')}`));if(c.evidence)evidence(checks,c.evidence,item.title.evidence.source);}
   for(const ev of check.evidence)evidence(checks,ev,item.title.evidence.source);
