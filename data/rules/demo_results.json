@@ -1,0 +1,685 @@
+[
+  {
+    "case": "serial_inside_range",
+    "result": {
+      "record_id": "row-0383",
+      "docket": "FAA-2003-16645",
+      "status": "TEXT_SCOPE_COMPARISON_ONLY",
+      "scope_decision": "MATCH",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "configuration": {
+        "make": "Embraer",
+        "model": "EMB-120",
+        "serial_number": "120006"
+      },
+      "checks": [
+        {
+          "field": "make",
+          "result": "MATCH",
+          "evidence": {
+            "field": "Make",
+            "start": 0,
+            "end": 7,
+            "quote": "Embraer"
+          }
+        },
+        {
+          "field": "model",
+          "result": "MATCH",
+          "allowed_exact_tokens": [
+            "EMB-120"
+          ],
+          "evidence": {
+            "record_id": "row-0383",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 383,
+              "physical_lines": [
+                5057,
+                5103
+              ],
+              "docket": "FAA-2003-16645",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69055-69057",
+              "published_page_range": [
+                69055,
+                69057
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 565,
+            "end": 702,
+            "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+          }
+        },
+        {
+          "field": "serial_number",
+          "value": 120006,
+          "included": true,
+          "excluded": false,
+          "evidence": {
+            "record_id": "row-0383",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 383,
+              "physical_lines": [
+                5057,
+                5103
+              ],
+              "docket": "FAA-2003-16645",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69055-69057",
+              "published_page_range": [
+                69055,
+                69057
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 565,
+            "end": 702,
+            "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "record_id": "row-0383",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 383,
+            "physical_lines": [
+              5057,
+              5103
+            ],
+            "docket": "FAA-2003-16645",
+            "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+            "published_page_range_raw": "Page 69055-69057",
+            "published_page_range": [
+              69055,
+              69057
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 565,
+          "end": 702,
+          "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 647,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to certain EMBRAER Model EMB-120 series airplanes. This proposal would require a one-time inspection for signs of overheating of wiring splices of the pitot/static 1, 2, and auxiliary sensors; the angle-of-attack sensors; the side slip sensors; and the current sensors. This proposal also would require follow-on actions. This action is necessary to prevent overheating of cockpit wiring, which could result in loss of operation of the affected systems, or smoke or fire in the cockpit. This action is intended to address the identified unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0383"
+        ],
+        "latest_observed_publication_date": "2003-12-10",
+        "latest_observed_record_ids": [
+          "row-0383"
+        ],
+        "is_latest_observed": true,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance."
+    }
+  },
+  {
+    "case": "serial_gap",
+    "result": {
+      "record_id": "row-0383",
+      "docket": "FAA-2003-16645",
+      "status": "TEXT_SCOPE_COMPARISON_ONLY",
+      "scope_decision": "NO_MATCH",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "configuration": {
+        "make": "Embraer",
+        "model": "EMB-120",
+        "serial_number": "120005"
+      },
+      "checks": [
+        {
+          "field": "make",
+          "result": "MATCH",
+          "evidence": {
+            "field": "Make",
+            "start": 0,
+            "end": 7,
+            "quote": "Embraer"
+          }
+        },
+        {
+          "field": "model",
+          "result": "MATCH",
+          "allowed_exact_tokens": [
+            "EMB-120"
+          ],
+          "evidence": {
+            "record_id": "row-0383",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 383,
+              "physical_lines": [
+                5057,
+                5103
+              ],
+              "docket": "FAA-2003-16645",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69055-69057",
+              "published_page_range": [
+                69055,
+                69057
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 565,
+            "end": 702,
+            "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+          }
+        },
+        {
+          "field": "serial_number",
+          "value": 120005,
+          "included": false,
+          "excluded": false,
+          "evidence": {
+            "record_id": "row-0383",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 383,
+              "physical_lines": [
+                5057,
+                5103
+              ],
+              "docket": "FAA-2003-16645",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69055-69057",
+              "published_page_range": [
+                69055,
+                69057
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 565,
+            "end": 702,
+            "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "record_id": "row-0383",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 383,
+            "physical_lines": [
+              5057,
+              5103
+            ],
+            "docket": "FAA-2003-16645",
+            "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+            "published_page_range_raw": "Page 69055-69057",
+            "published_page_range": [
+              69055,
+              69057
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 565,
+          "end": 702,
+          "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 647,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to certain EMBRAER Model EMB-120 series airplanes. This proposal would require a one-time inspection for signs of overheating of wiring splices of the pitot/static 1, 2, and auxiliary sensors; the angle-of-attack sensors; the side slip sensors; and the current sensors. This proposal also would require follow-on actions. This action is necessary to prevent overheating of cockpit wiring, which could result in loss of operation of the affected systems, or smoke or fire in the cockpit. This action is intended to address the identified unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0383"
+        ],
+        "latest_observed_publication_date": "2003-12-10",
+        "latest_observed_record_ids": [
+          "row-0383"
+        ],
+        "is_latest_observed": true,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance."
+    }
+  },
+  {
+    "case": "missing_serial",
+    "result": {
+      "record_id": "row-0383",
+      "docket": "FAA-2003-16645",
+      "status": "NEEDS_CLARIFICATION",
+      "scope_decision": "UNKNOWN",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "IDENTIFIER_REQUIRED"
+      ],
+      "configuration": {
+        "make": "Embraer",
+        "model": "EMB-120"
+      },
+      "checks": [
+        {
+          "field": "make",
+          "result": "MATCH",
+          "evidence": {
+            "field": "Make",
+            "start": 0,
+            "end": 7,
+            "quote": "Embraer"
+          }
+        },
+        {
+          "field": "model",
+          "result": "MATCH",
+          "allowed_exact_tokens": [
+            "EMB-120"
+          ],
+          "evidence": {
+            "record_id": "row-0383",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 383,
+              "physical_lines": [
+                5057,
+                5103
+              ],
+              "docket": "FAA-2003-16645",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69055-69057",
+              "published_page_range": [
+                69055,
+                69057
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 565,
+            "end": 702,
+            "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "record_id": "row-0383",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 383,
+            "physical_lines": [
+              5057,
+              5103
+            ],
+            "docket": "FAA-2003-16645",
+            "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+            "published_page_range_raw": "Page 69055-69057",
+            "published_page_range": [
+              69055,
+              69057
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 565,
+          "end": 702,
+          "quote": "Applicability: Model EMB-120 series airplanes, certificated in any category; serial numbers 120004, and 120006 through 120352 inclusive. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 647,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to certain EMBRAER Model EMB-120 series airplanes. This proposal would require a one-time inspection for signs of overheating of wiring splices of the pitot/static 1, 2, and auxiliary sensors; the angle-of-attack sensors; the side slip sensors; and the current sensors. This proposal also would require follow-on actions. This action is necessary to prevent overheating of cockpit wiring, which could result in loss of operation of the affected systems, or smoke or fire in the cockpit. This action is intended to address the identified unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0383"
+        ],
+        "latest_observed_publication_date": "2003-12-10",
+        "latest_observed_record_ids": [
+          "row-0383"
+        ],
+        "is_latest_observed": true,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance.",
+      "missing_fields": [
+        "serial_number"
+      ]
+    }
+  },
+  {
+    "case": "line_upper_boundary",
+    "result": {
+      "record_id": "row-0384",
+      "docket": "FAA-2003-16646",
+      "status": "TEXT_SCOPE_COMPARISON_ONLY",
+      "scope_decision": "MATCH",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "configuration": {
+        "make": "Boeing",
+        "model": "757-200",
+        "line_number": "95"
+      },
+      "checks": [
+        {
+          "field": "make",
+          "result": "MATCH",
+          "evidence": {
+            "field": "Make",
+            "start": 0,
+            "end": 6,
+            "quote": "Boeing"
+          }
+        },
+        {
+          "field": "model",
+          "result": "MATCH",
+          "allowed_exact_tokens": [
+            "757-200"
+          ],
+          "evidence": {
+            "record_id": "row-0384",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 384,
+              "physical_lines": [
+                5104,
+                5154
+              ],
+              "docket": "FAA-2003-16646",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69053-69055",
+              "published_page_range": [
+                69053,
+                69055
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 523,
+            "end": 637,
+            "quote": "Applicability: Model 757-200 series airplanes, line numbers 1 through 95 inclusive; certificated in any category. "
+          }
+        },
+        {
+          "field": "line_number",
+          "value": 95,
+          "included": true,
+          "excluded": false,
+          "evidence": {
+            "record_id": "row-0384",
+            "source": {
+              "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+              "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+              "csv_record_number": 384,
+              "physical_lines": [
+                5104,
+                5154
+              ],
+              "docket": "FAA-2003-16646",
+              "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+              "published_page_range_raw": "Page 69053-69055",
+              "published_page_range": [
+                69053,
+                69055
+              ],
+              "page_precision": "document_range_only_not_exact_claim_page",
+              "url": null
+            },
+            "field": "Link for Submitting Public Comment",
+            "start": 523,
+            "end": 637,
+            "quote": "Applicability: Model 757-200 series airplanes, line numbers 1 through 95 inclusive; certificated in any category. "
+          }
+        }
+      ],
+      "evidence": [
+        {
+          "record_id": "row-0384",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 384,
+            "physical_lines": [
+              5104,
+              5154
+            ],
+            "docket": "FAA-2003-16646",
+            "citation": "Federal Register: December 11, 2003 (Volume 68, Number 238)",
+            "published_page_range_raw": "Page 69053-69055",
+            "published_page_range": [
+              69053,
+              69055
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 523,
+          "end": 637,
+          "quote": "Applicability: Model 757-200 series airplanes, line numbers 1 through 95 inclusive; certificated in any category. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 675,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to certain Boeing Model 757-200 series airplanes. This proposal would require repetitive inspections of the intercostals that back up the door stops and hinges at door 2 left and door 2 right for cracks, and corrective action, if necessary. This proposal also would provide for an optional terminating action for the repetitive inspections. This action is necessary to prevent fatigue cracks from propagating in the intercostals, which could lead to the loss of a door in flight and subsequent rapid decompression. This action is intended to address the identified unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0384"
+        ],
+        "latest_observed_publication_date": "2003-12-10",
+        "latest_observed_record_ids": [
+          "row-0384"
+        ],
+        "is_latest_observed": true,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance."
+    }
+  },
+  {
+    "case": "complex_equipment_condition",
+    "result": {
+      "record_id": "row-0420",
+      "docket": "2001-NM-93-AD",
+      "status": "REFUSE",
+      "scope_decision": "UNKNOWN",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "configuration": {
+        "make": "Boeing",
+        "model": "777-200"
+      },
+      "checks": [],
+      "evidence": [
+        {
+          "record_id": "row-0420",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 420,
+            "physical_lines": [
+              6488,
+              6528
+            ],
+            "docket": "2001-NM-93-AD",
+            "citation": "Federal Register: October 30, 2001 (Volume 66, Number 210)",
+            "published_page_range_raw": "Page 54727-54729",
+            "published_page_range": [
+              54727,
+              54729
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 526,
+          "end": 642,
+          "quote": "Applicability: Model 777-200 series airplanes equipped with General Electric engines, certificated in any category. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 830,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to all Boeing Model 777-200 series airplanes equipped with General Electric engines. This proposal would require installation of a high-temperature silicone foam seal on the aft fairing of the strut. This action is necessary to prevent primary engine exhaust from entering the aft fairing of the strut, elevating the temperature in the aft fairing of the strut, and creating a potential source of ignition, which could lead to an uncontrolled fire in the aft fairing of the strut. Such a fire would expose the wing fuel tank to high-temperature gasses and flames and result in a potential ignition source for the fuel tank, and reduced structural integrity of the wing. This action is intended to address the identified unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0413",
+          "row-0420"
+        ],
+        "latest_observed_publication_date": "2002-07-18",
+        "latest_observed_record_ids": [
+          "row-0413"
+        ],
+        "is_latest_observed": false,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance."
+    }
+  },
+  {
+    "case": "older_observed_record",
+    "result": {
+      "record_id": "row-0431",
+      "docket": "2000-NM-120-AD",
+      "status": "REFUSE",
+      "scope_decision": "UNKNOWN",
+      "legal_applicability": "UNVERIFIED",
+      "operational_answer": "REFUSE",
+      "reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "configuration": {
+        "make": "Embraer",
+        "model": "EMB-120"
+      },
+      "checks": [],
+      "evidence": [
+        {
+          "record_id": "row-0431",
+          "source": {
+            "file": "AD Notice of Proposed Rulemaking (AD NPRM).xlsx - AD Notice of Proposed Rulemaki.csv",
+            "file_sha256": "81bf3b81d6b16593af5ab3deb61d0b89e7c65489f45962075f2b41ecfb4fff34",
+            "csv_record_number": 431,
+            "physical_lines": [
+              6717,
+              6774
+            ],
+            "docket": "2000-NM-120-AD",
+            "citation": "Federal Register: April 27, 2001 (Volume 66, Number 82)",
+            "published_page_range_raw": "Page 21107-21110",
+            "published_page_range": [
+              21107,
+              21110
+            ],
+            "page_precision": "document_range_only_not_exact_claim_page",
+            "url": null
+          },
+          "field": "Link for Submitting Public Comment",
+          "start": 572,
+          "end": 653,
+          "quote": "Applicability: All Model EMB-120 series airplanes, certificated in any category. "
+        }
+      ],
+      "document_kind": "proposal",
+      "document_kind_evidence": [
+        {
+          "field": "Summary",
+          "start": 0,
+          "end": 1080,
+          "quote": "This document proposes the adoption of a new airworthiness directive (AD) that is applicable to all EMBRAER Model EMB-120 series airplanes. This proposal would require replacing certain existing potentiometers with recently manufactured potentiometers, modifying the flexible couplers that attach the shafts of the potentiometers to the shafts of the primary flight controls, performing repetitive calibration tests of the potentiometers and obtaining repetitive readouts of the flight data recorder (FDR), and reporting the results to the FAA. This action is necessary to prevent the potentiometers that provide information on the positions of the primary flight controls to the FDR from transmitting noisy signals or becoming improperly calibrated, resulting in the transmission of incomplete or inaccurate data to the FDR. This lack of reliable data could hamper discovery of the unsafe condition which caused an accident or an incident and prevent the FAA from developing and mandating actions to prevent additional incidents or accidents caused by that same unsafe condition."
+        }
+      ],
+      "dataset_history": {
+        "same_docket_record_ids": [
+          "row-0294",
+          "row-0351",
+          "row-0403",
+          "row-0431"
+        ],
+        "latest_observed_publication_date": "2008-01-30",
+        "latest_observed_record_ids": [
+          "row-0294"
+        ],
+        "is_latest_observed": false,
+        "latest_legal_version_verified": false,
+        "note": "Same docket is a history grouping, not proof of revision or effective supersession. Latest means within this CSV only."
+      },
+      "warning": "Only compares configuration with a quoted proposed scope. Does not establish an effective AD or authorize maintenance."
+    }
+  }
+]

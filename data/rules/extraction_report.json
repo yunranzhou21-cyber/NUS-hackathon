@@ -1,0 +1,16 @@
+{
+  "records": 431,
+  "explicit_block_records": 43,
+  "supported_text_grammar_records": 15,
+  "supported_with_identifier_predicate": 7,
+  "unsupported_reasons": {
+    "NO_EXPLICIT_APPLICABILITY_BLOCK": 388,
+    "UNRESOLVED_ADDITIONAL_CONDITIONS": 16,
+    "UNSUPPORTED_MODEL_OR_TABLE_SYNTAX": 8,
+    "UNSUPPORTED_IDENTIFIER_CONDITION": 2,
+    "UNSUPPORTED_MODEL_LIST": 2
+  },
+  "validated_block_citations": 43,
+  "expert_reviewed_rules": 0,
+  "legally_verified_rules": 0
+}
