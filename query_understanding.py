@@ -20,7 +20,7 @@ from search import IDENTIFIER
 
 INTENTS = ("search_documents", "check_proposed_scope", "find_history")
 FIELDS = ("make", "model", "serial_number", "line_number")
-HISTORY_WORDS = re.compile(r"\b(history|historical|older|previous|superseded|earlier versions?)\b", re.I)
+HISTORY_WORDS = re.compile(r"\b(history|historical|older|previous|earlier versions?)\b", re.I)
 SYSTEM_PROMPT = (
     "You convert an aviation-regulation search question into JSON. Use ONLY "
     "words present in the question. Never add knowledge of your own. Return "

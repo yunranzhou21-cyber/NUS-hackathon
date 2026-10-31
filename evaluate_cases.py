@@ -9,6 +9,7 @@ is NOT a headline number, because it hands the system the right record.
 Scoring is fixed before running; see `score_case`.
 """
 import argparse
+import hashlib
 import json
 import threading
 from collections import Counter, defaultdict
@@ -17,12 +18,14 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 import web_app
-from applicability import evaluate, load_records, parse_record
+from applicability import PARSER_VERSION, evaluate, load_records, parse_record
+from configuration import TEXT_FIELDS, normalize_configuration, supported_field
 
 CASES = "eval/airbus_q4_test_cases.jsonl"
-SUPPORTED = ("make", "model", "serial_number", "line_number")
 DEFINITIVE = ("MATCH", "NO_MATCH")
-DECLINES = ("REFUSE", "NEEDS_CLARIFICATION")
+# INSUFFICIENT_EVIDENCE was added with the answerability check: an explicit statement
+# that records were found but cannot answer. It is an explicit decline like the others.
+DECLINES = ("REFUSE", "NEEDS_CLARIFICATION", "INSUFFICIENT_EVIDENCE")
 
 
 def load_cases(path):
@@ -32,8 +35,9 @@ def load_cases(path):
 
 def split_config(configuration):
     """Keep only inputs the system can accept; report the rest instead of hiding it."""
-    used = {k: str(v) for k, v in configuration.items() if k in SUPPORTED}
-    dropped = sorted(k for k in configuration if k not in SUPPORTED)
+    used = normalize_configuration({k: str(v) if k in TEXT_FIELDS else v
+                                    for k, v in configuration.items() if supported_field(k)})
+    dropped = sorted(k for k in configuration if not supported_field(k))
     return used, dropped
 
 
@@ -62,6 +66,9 @@ def score_case(case, response):
     rank = (list(results).index(target) + 1) if hit else None
     detail = {"status": status, "reason": reason, "retrieved": bool(hit),
               "rank": rank, "scope_decision": scope}
+    if hit:
+        detail['scope_reason_codes'] = hit['configuration_check']['reason_codes']
+        detail['missing_fields'] = hit['configuration_check'].get('missing_fields', [])
 
     if decision in DEFINITIVE:
         if not hit:
@@ -111,7 +118,7 @@ def structural_checks(response):
     return ok and pages
 
 
-def run_mode_b(cases, records):
+def run_mode_b(cases, records, allow_historical=False):
     parsed = {r["record_id"]: parse_record(r) for r in records}
     rows = []
     for case in cases:
@@ -120,7 +127,7 @@ def run_mode_b(cases, records):
         rid = case["expected"]["relevant_record_ids"][0]
         used, dropped = split_config(case["configuration"])
         used["make"] = parsed[rid]["make"]
-        check = evaluate(parsed[rid], used)
+        check = evaluate(parsed[rid], used, allow_historical)
         fake = {"status": check["status"], "results": [{
             "record_id": rid, "evidence": [], "configuration_check": check}],
             "reason_codes": check["reason_codes"]}
@@ -138,6 +145,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", default=CASES)
     parser.add_argument("--out", default="eval/results.json")
+    parser.add_argument("--historical", action="store_true",
+                        help="send historical_comparison=true (explicit mode for superseded proposals)")
     args = parser.parse_args()
     cases = load_cases(args.cases)
     server = ThreadingHTTPServer(("127.0.0.1", 0), web_app.Handler)
@@ -147,26 +156,31 @@ def main():
     try:
         for case in cases:
             used, dropped = split_config(case["configuration"])
-            response = post(base, {"query": case["query"], "configuration": used, "limit": 5})
+            response = post(base, {"query": case["query"], "configuration": used, "limit": 5,
+                                   "historical_comparison": args.historical})
             outcome, detail = score_case(case, response)
             latencies.append(response["retrieval_ms"])
             rows.append({"test_id": case["test_id"], "category": case["category"],
                          "expected": case["expected"]["decision"], "outcome": outcome,
                          "dropped_inputs": dropped, "structural_ok": structural_checks(response),
+                         "submitted_configuration": used,
                          "interpretation": response.get("interpretation", {}).get("fields"),
                          **detail})
     finally:
         server.shutdown()
         server.server_close()
-    mode_b = run_mode_b(cases, load_records())
+    mode_b = run_mode_b(cases, load_records(), args.historical)
     total = Counter(r["outcome"] for r in rows)
     by_category = defaultdict(Counter)
     for r in rows:
         by_category[r["category"]][r["outcome"]] += 1
     summary = {
-        "cases": len(rows), "file_sha256_note": "see eval/ directory", "mode_A": dict(total),
+        "cases": len(rows), "case_file_sha256": hashlib.sha256(Path(args.cases).read_bytes()).hexdigest(),
+        "parser_version": PARSER_VERSION, "mode_A": dict(total),
+        "historical_comparison": args.historical,
         "mode_A_pass_rate": total["PASS"] / len(rows),
         "mode_A_unsafe_errors": total["UNSAFE_FAIL"],
+        "scope_unknown_cases": sum(r['scope_decision'] == 'UNKNOWN' for r in rows),
         "mode_B_diagnostic": dict(Counter(r["outcome"] for r in mode_b)),
         "retrieval_hit_rate_labeled_record": sum(r["retrieved"] for r in rows) / len(rows),
         "latency_ms": {"max": max(latencies), "mean": sum(latencies) / len(latencies)},

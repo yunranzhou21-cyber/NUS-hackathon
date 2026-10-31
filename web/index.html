@@ -11,8 +11,11 @@
 <label for="query">Question / keywords</label><textarea id="query" required maxlength="1000" rows="3" placeholder="Find proposals for EMB-120 serial number 120006"></textarea>
 <label for="make">Manufacturer <span>recommended</span></label><input id="make" maxlength="150" placeholder="e.g. Embraer or Boeing">
 <label for="model">Model <span>optional</span></label><input id="model" maxlength="150" placeholder="e.g. EMB-120">
+<label for="manufacturer_serial_number">Manufacturer serial number (MSN)</label><input id="manufacturer_serial_number" maxlength="150" placeholder="Use when the source specifies MSN">
 <div class="two"><div><label for="serial_number">Serial number</label><input id="serial_number" maxlength="150" placeholder="120006"></div><div><label for="line_number">Line number</label><input id="line_number" maxlength="150" placeholder="Not a serial number"></div></div>
 <label class="checkbox"><input id="history" type="checkbox"> Include historical records</label>
+<label class="checkbox"><input id="historical" type="checkbox"> Compare superseded proposals</label>
+<p class="hint">Off by default. When on, an older proposal's text can be compared, labeled as historical text only. It is not current.</p>
 <label class="checkbox ai"><input id="use_ai" type="checkbox" disabled> AI query understanding</label>
 <p class="hint" id="ai-hint">Checking AI status…</p>
 <details id="ai-settings"><summary>AI settings</summary>

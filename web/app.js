@@ -3,7 +3,12 @@ const $ = id => document.getElementById(id);
 const reasons = {
  NO_EVIDENCE_FOR_QUERY_AND_FILTERS:'No evidence found for this query and its filters. Try different keywords or include historical records.',
  UNSUPPORTED_QUERY_LANGUAGE_OR_TERMS:'Some query terms are unsupported. Use a model, English keywords, or an example query.',
- CONFIGURATION_INCOMPLETE:'Provide the manufacturer and model.', IDENTIFIER_REQUIRED:'Provide the identifier required by the quoted condition.',
+ CONFIGURATION_INCOMPLETE:'Provide the exact model. Manufacturer is optional; if supplied, it must agree with the source.', IDENTIFIER_REQUIRED:'Provide the identifier required by the quoted condition.',
+ EXTERNAL_CONDITION_UNRESOLVED:'Answer the cited bulletin condition below, or leave it unknown.',
+ EXTERNAL_CONDITION_ANSWERS_CONFLICT:'Your answers to the same bulletin condition conflict. Please clarify.',
+ RELIES_ON_USER_ATTESTED_EXTERNAL_CONDITION:'This comparison relies on your bulletin answer. It has not been independently verified.',
+ UNKNOWN_EXTERNAL_CONDITION_ID:'An answer belongs to a different condition or bulletin version. Review it before comparing.',
+ INVALID_CONFIGURATION:'Check the configuration field types and values.',
  MODEL_NOT_EXACTLY_RESOLVED:'The exact model could not be resolved. Series membership has not been inferred.',
  APPLICABILITY_NOT_FULLY_PARSED:'The conditions were not fully parsed. Automatic evaluation is unavailable.',
  NOT_LATEST_OBSERVED_RECORD_IN_CSV:'This is not the latest observation for this docket in the CSV.',
@@ -13,6 +18,12 @@ const reasons = {
  MULTIPLE_MODELS_NEED_CLARIFICATION:'Multiple models detected. Search one model at a time.',
  MAKE_MISMATCH_OR_UNREGISTERED_ALIAS:'The manufacturer differs or its alias is not registered.',
  SEARCH_TERMS_REQUIRED:'Enter a model or meaningful keywords.',
+ HISTORICAL_PROPOSAL_TEXT_ONLY_NOT_CURRENT:'Historical text only. This proposal is not the latest record for its docket, so this is not a current scope.',
+ EXACT_PAGE_UNAVAILABLE:'Exact page not available.',
+ OPERATIONAL_DECISION_OUT_OF_SCOPE:'Compliance or release decisions are outside what these records can support.',
+ REQUESTED_VALUE_NOT_IN_RECORD:'The requested value is not in the record.',
+ PROCEDURE_NOT_IN_RECORD:'The procedure is not in the record.',
+ EFFECTIVE_STATUS_NOT_ESTABLISHED:'No effective rule is established by these records.',
  IDENTIFIER_NOT_FOUND:'That identifier is not in the supplied data. No similar search was substituted.',
  IDENTIFIER_MUST_BE_NUMERIC:'This rule supports numeric identifiers only.',
  CONFLICTING_IDENTIFIERS:'Conflicting identifiers detected. Please clarify.',
@@ -41,10 +52,23 @@ function evidence(parent, ev, fallback) {
  if(source.url) { try {const u=new URL(source.url);if(['https:','http:'].includes(u.protocol)){const a=node('a','Open source page ↗');a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';box.append(a);}}catch(_){} }
  parent.append(box);
 }
+let conditionAnswers={};
 function render(data) {
  $('results').replaceChildren();$('summary').replaceChildren();
  const titles={EVIDENCE_FOUND:'Candidate evidence found',REFUSE:'Unable to provide a reliable answer',NEEDS_CLARIFICATION:'Query needs clarification'};
+ titles.INSUFFICIENT_EVIDENCE='Record found, but it cannot answer this';
  $('summary').append(node('h2',titles[data.status] || 'Search complete'));
+ if(data.answerability && data.answerability.unmet_requests.length){
+  const box=node('div',undefined,'interp');
+  box.append(node('strong','What these records cannot tell you'));
+  for(const u of data.answerability.unmet_requests){
+   box.append(node('p',`You asked about: “${u.asked}”`,'meta'));
+   box.append(node('p',u.explanation));
+   for(const ev of u.evidence || [])evidence(box,ev);
+  }
+  box.append(node('p','The matching record is shown below. Nothing was filled in from outside the supplied data.','meta'));
+  $('summary').append(box);
+ }
  $('summary').append(node('p',`${data.results.length} results returned · Retrieval ${data.retrieval_ms} ms · Not exhaustive`));
  for(const code of data.reason_codes || [])$('summary').append(node('p',reasons[code] || code));
  if(data.interpretation){
@@ -74,6 +98,28 @@ function render(data) {
   decision.append(node('strong',labels[check.scope_decision]));
   for(const code of check.reason_codes)decision.append(node('p',reasons[code] || code,'reason'));
   if(check.missing_fields)decision.append(node('p',`Required fields: ${check.missing_fields.join(' / ')}`));
+  if((check.external_conditions || check.required_supplements || []).length){
+   const inputs=[];
+   for(const condition of check.external_conditions || check.required_supplements){
+    const label=node('label',condition.question), select=node('select');
+    select.setAttribute('aria-label',condition.question);
+    for(const [value,text] of [['','Unknown / not verified'],['yes','Yes'],['no','No']]){
+     const option=node('option',text);option.value=value;select.append(option);
+    }
+    if(Object.hasOwn(conditionAnswers,condition.id))select.value=conditionAnswers[condition.id]?'yes':'no';
+    label.append(select);decision.append(label);
+    evidence(decision,condition.evidence,item.title.evidence.source);
+    inputs.push([condition.id,select]);
+   }
+   decision.append(node('p','Your answers describe this aircraft and the exact cited bulletin version. They are not independent verification.','hint'));
+   const apply=node('button','Compare with my answers','secondary');apply.type='button';
+   apply.addEventListener('click',()=>{
+    conditionAnswers={};
+    for(const [id,select] of inputs)if(select.value)conditionAnswers[id]=select.value==='yes';
+    $('search-form').requestSubmit();
+   });
+   decision.append(apply);
+  }
   card.append(decision);
   const rev=item.revision;
   if(rev && !rev.this_is_latest){
@@ -91,7 +137,7 @@ function render(data) {
    card.append(node('p',`Matched: ${item.match.matched_terms.join(', ')}${item.match.unmatched_terms.length?' · Not found in the shown text: '+item.match.unmatched_terms.join(', '):''}`,'meta'));
   }
   const checks=detail(card,'Configuration checks & supporting evidence');
-  for(const c of check.checks){checks.append(node('p',`${c.field}: ${c.result || (c.included && !c.excluded?'Within range':'Outside range or excluded')}`));if(c.evidence)evidence(checks,c.evidence,item.title.evidence.source);}
+  for(const c of check.checks){checks.append(node('p',`${c.field}: ${c.result || (c.included && !c.excluded?'Within range':'Outside range or excluded')}${c.source==='USER_ATTESTED_NOT_VERIFIED'?' · User-provided answer; not independently verified':''}`));if(c.evidence)evidence(checks,c.evidence,item.title.evidence.source);}
   for(const ev of check.evidence)evidence(checks,ev,item.title.evidence.source);
   const citations=detail(card,`Inspect source text & citations (${item.evidence.length} passages)`);
   item.evidence.forEach(ev=>evidence(citations,ev));
@@ -136,14 +182,16 @@ $('ai-disconnect').addEventListener('click',async()=>{
  const {data}=await aiConfig({action:'disconnect'}); applyStatus(data,true); $('ai-result').textContent='Disconnected. The key was forgotten.';
 });
 let requestNumber=0;
+for(const key of ['query','make','model','serial_number','line_number','manufacturer_serial_number'])$(key).addEventListener('input',()=>{conditionAnswers={};});
 $('search-form').addEventListener('submit',async event=>{
  event.preventDefault(); const current=++requestNumber;
- const configuration={};for(const key of ['make','model','serial_number','line_number'])if($(key).value.trim())configuration[key]=$(key).value.trim();
+ const configuration={};for(const key of ['make','model','serial_number','line_number','manufacturer_serial_number'])if($(key).value.trim())configuration[key]=$(key).value.trim();
+ if(Object.keys(conditionAnswers).length)configuration.external_conditions={...conditionAnswers};
  $('submit').disabled=true;$('submit').textContent='Searching…';
  $('results').replaceChildren();$('raw-panel').hidden=true;
  $('summary').replaceChildren(node('h2','Searching source evidence…'));
  try{
-  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked,use_ai:$('use_ai').checked})});
+  const response=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('query').value,configuration,include_history:$('history').checked,historical_comparison:$('historical').checked,use_ai:$('use_ai').checked})});
   const data=await response.json();if(!response.ok)throw new Error(data.error==='INDEX_UNAVAILABLE'?'Search index unavailable. Run python search.py build.':'Request failed. Check your inputs and try again.');
   if(current===requestNumber)render(data);
  }catch(error){if(current===requestNumber)$('summary').replaceChildren(node('h2','Search could not complete'),node('p',error.message));}
@@ -151,6 +199,7 @@ $('search-form').addEventListener('submit',async event=>{
 });
 const examples={serial:{query:'Find proposals for EMB-120 serial number 120006',make:'Embraer'},corrosion:{query:'corrosion',make:'Boeing'},unknown:{query:'zzzzUnlistedModel999',make:''}};
 for(const button of document.querySelectorAll('[data-example]'))button.addEventListener('click',()=>{
- const sample=examples[button.dataset.example];for(const key of ['query','make','model','serial_number','line_number'])$(key).value=sample[key] || '';
+ conditionAnswers={};
+ const sample=examples[button.dataset.example];for(const key of ['query','make','model','serial_number','line_number','manufacturer_serial_number'])$(key).value=sample[key] || '';
  $('history').checked=false;$('search-form').requestSubmit();
 });

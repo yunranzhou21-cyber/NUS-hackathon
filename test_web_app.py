@@ -69,6 +69,55 @@ class WebTests(unittest.TestCase):
             with self.request('/api/search', value) as response:
                 self.assertEqual(response.status, 400)
 
+    def test_msn_and_bulletin_conditions_through_api(self):
+        examples = [
+            ('2002-NM-224-AD', {'model': 'A320-211', 'manufacturer_serial_number': '1516'}, 'row-0375', 'MATCH'),
+            ('2002-NM-224-AD', {'model': 'A320-211', 'manufacturer_serial_number': '1624'}, 'row-0375', 'NO_MATCH'),
+            ('2004-SW-16-AD', {'model': '600N', 'serial_number': 'RN066',
+                               'TB600N_007_2004_01_12_completed': False}, 'row-0350', 'MATCH'),
+            ('2004-SW-16-AD', {'model': '600N', 'serial_number': 'RN066',
+                               'TB600N_007_2004_01_12_completed': True}, 'row-0350', 'NO_MATCH'),
+            ('2004-SW-16-AD', {'model': '600N', 'serial_number': 'RN066',
+                               'TB600N_007_2004_01_13_completed': False}, 'row-0350', 'UNKNOWN'),
+        ]
+        for query, configuration, rid, expected in examples:
+            with self.subTest(configuration=configuration):
+                with self.request('/api/search', {'query': query, 'configuration': configuration,
+                                                  'historical_comparison': True}) as response:
+                    self.assertEqual(response.status, 200)
+                    data = json.load(response)
+                    check = next(r['configuration_check'] for r in data['results'] if r['record_id'] == rid)
+                    self.assertEqual(check['scope_decision'], expected)
+                    self.assertEqual(check['operational_answer'], 'REFUSE')
+                    self.assertEqual(check['legal_applicability'], 'UNVERIFIED')
+                    if expected != 'UNKNOWN':
+                        self.assertTrue(check['historical_text_only'])
+
+    def test_condition_inputs_validate_types_and_keep_unknown_unknown(self):
+        for config in ({'TB600N_007_2004_01_12_completed': 'false'},
+                       {'TB600N_007_2004_02_31_completed': False},
+                       {'external_conditions': []},
+                       {'external_conditions': {'condition': 'maybe'}},
+                       {'manufacturer_serial_number': True}):
+            with self.subTest(configuration=config):
+                with self.request('/api/search', {'query': '600N', 'configuration': config}) as response:
+                    self.assertEqual(response.status, 400)
+        with self.request('/api/search', {'query': '2004-SW-16-AD',
+                          'configuration': {'model': '600N', 'serial_number': 'RN066'},
+                          'historical_comparison': True}) as response:
+            data = json.load(response)
+            check = next(r['configuration_check'] for r in data['results'] if r['record_id'] == 'row-0350')
+            condition = check['required_supplements'][0]
+            self.assertEqual(check['scope_decision'], 'UNKNOWN')
+        with self.request('/api/search', {'query': '2004-SW-16-AD',
+                          'configuration': {'model': '600N', 'serial_number': 'RN066',
+                                            'external_conditions': {condition['id']: False}},
+                          'historical_comparison': True}) as response:
+            data = json.load(response)
+            check = next(r['configuration_check'] for r in data['results'] if r['record_id'] == 'row-0350')
+            self.assertEqual(check['scope_decision'], 'MATCH')
+            self.assertIn('RELIES_ON_USER_ATTESTED_EXTERNAL_CONDITION', check['reason_codes'])
+
     def test_cross_origin_denied(self):
         with self.request('/api/search', {'query': '777'}, 'https://example.com') as response:
             self.assertEqual(response.status, 403)
