@@ -53,9 +53,9 @@ class RealDataTests(unittest.TestCase):
     def setUpClass(cls):
         cls.parsed = {r["record_id"]: parse_record(r) for r in load_records()}
 
-    def check(self, rid, **configuration):
+    def check(self, rid, allow_historical=False, **configuration):
         item = self.parsed[rid]
-        return evaluate(item, {"make": item["make"], **configuration})
+        return evaluate(item, {"make": item["make"], **configuration}, allow_historical)
 
     def test_real_emb_serial_union(self):
         item = self.parsed["row-0383"]
@@ -89,12 +89,58 @@ class RealDataTests(unittest.TestCase):
             self.assertEqual(result["scope_decision"], "UNKNOWN")
 
     def test_complex_real_conditions_refused(self):
-        for rid in ("row-0269", "row-0292", "row-0350", "row-0370",
-                    "row-0375", "row-0377", "row-0412", "row-0420"):
+        for rid in ("row-0269", "row-0292", "row-0370", "row-0420"):
             with self.subTest(record=rid):
                 self.assertIsNone(self.parsed[rid]["rule"])
                 self.assertEqual(self.check(rid, model="777-200")["scope_decision"],
                                  "UNKNOWN")
+
+    def test_msn_table_boundaries_and_exceptions(self):
+        for model, msn, expected in [('A320-211', '1515', 'NO_MATCH'),
+                                     ('A320-211', '1516', 'MATCH'),
+                                     ('A320-211', '1624', 'NO_MATCH'),
+                                     ('A320-211', '1754', 'MATCH'),
+                                     ('A320-211', '1755', 'NO_MATCH'),
+                                     ('A321-211', '1572', 'MATCH'),
+                                     ('A321-211', '1675', 'NO_MATCH')]:
+            with self.subTest(model=model, msn=msn):
+                result = self.check('row-0375', allow_historical=True, model=model, manufacturer_serial_number=msn)
+                self.assertEqual(result['scope_decision'], expected)
+        missing = self.check('row-0375', allow_historical=True, model='A320-211', line_number='1516')
+        self.assertEqual(missing['scope_decision'], 'UNKNOWN')
+        self.assertIn('manufacturer_serial_number', missing['missing_fields'])
+
+    def test_prefixed_serial_and_explicit_false_attestation(self):
+        field = 'TB600N_007_2004_01_12_completed'
+        for serial, done, expected in [('RN003', False, 'MATCH'),
+                                       ('RN066', False, 'MATCH'),
+                                       ('RN067', False, 'NO_MATCH'),
+                                       ('RN068', False, 'MATCH'),
+                                       ('RN066', True, 'NO_MATCH'),
+                                       ('066', False, 'UNKNOWN')]:
+            with self.subTest(serial=serial, done=done):
+                result = self.check('row-0350', allow_historical=True, model='600N', serial_number=serial, **{field: done})
+                self.assertEqual(result['scope_decision'], expected)
+        unknown = self.check('row-0350', allow_historical=True, model='600N', serial_number='RN066')
+        self.assertEqual(unknown['scope_decision'], 'UNKNOWN')
+        self.assertTrue(unknown['required_supplements'])
+
+    def test_external_condition_dates_and_conflicting_answers(self):
+        cfg = {'model': '600N', 'serial_number': 'RN066', 'allow_historical': True}
+        wrong_date = self.check('row-0350', **cfg, TB600N_007_2004_01_13_completed=False)
+        self.assertEqual(wrong_date['scope_decision'], 'UNKNOWN')
+        condition = self.parsed['row-0350']['rule']['external_conditions'][0]
+        self.assertIn('@2004-01-12', condition['id'])
+        conflict = self.check('row-0350', **cfg, TB600N_007_2004_01_12_completed=False,
+                              external_conditions={condition['id']: True})
+        self.assertEqual(conflict['scope_decision'], 'UNKNOWN')
+        self.assertIn('EXTERNAL_CONDITION_ANSWERS_CONFLICT', conflict['reason_codes'])
+
+    def test_listing_and_actions_remain_unknown_without_answers(self):
+        for rid, model in [('row-0377', 'EMB-145'), ('row-0412', 'FALCON 2000')]:
+            out = self.check(rid, allow_historical=True, model=model, serial_number='132')
+            self.assertEqual(out['scope_decision'], 'UNKNOWN')
+            self.assertIn('EXTERNAL_CONDITION_UNRESOLVED', out['reason_codes'])
 
     def test_no_automatic_series_membership(self):
         result = self.check("row-0414", model="777-200")

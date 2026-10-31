@@ -1,16 +1,19 @@
 {
   "records": 431,
   "explicit_block_records": 43,
-  "supported_text_grammar_records": 15,
-  "supported_with_identifier_predicate": 7,
+  "supported_text_grammar_records": 22,
+  "supported_with_identifier_predicate": 9,
+  "supported_table_rules": 1,
+  "supported_prefixed_identifier_rules": 1,
+  "rules_with_external_conditions": 6,
   "unsupported_reasons": {
     "NO_EXPLICIT_APPLICABILITY_BLOCK": 388,
-    "UNRESOLVED_ADDITIONAL_CONDITIONS": 16,
-    "UNSUPPORTED_MODEL_OR_TABLE_SYNTAX": 8,
-    "UNSUPPORTED_IDENTIFIER_CONDITION": 2,
+    "UNRESOLVED_ADDITIONAL_CONDITIONS": 12,
+    "UNSUPPORTED_MODEL_OR_TABLE_SYNTAX": 6,
+    "UNSUPPORTED_IDENTIFIER_CONDITION": 1,
     "UNSUPPORTED_MODEL_LIST": 2
   },
-  "validated_block_citations": 43,
+  "validated_citations": 51,
   "expert_reviewed_rules": 0,
   "legally_verified_rules": 0
 }

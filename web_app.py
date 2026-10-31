@@ -11,6 +11,7 @@ from query_understanding import (clear_runtime, get_provider, interpret,
                                  status as ai_status, test_connection,
                                  validate_settings)
 from search import SearchEngine, build_index
+from configuration import normalize_configuration
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
@@ -107,11 +108,10 @@ class Handler(BaseHTTPRequestHandler):
             history = value.get('include_history', False)
             if (not isinstance(query, str) or len(query) > 1000
                     or not isinstance(config, dict)
-                    or set(config) - {'make', 'model', 'serial_number', 'line_number'}
-                    or any(not isinstance(v, str) or len(v) > 150 for v in config.values())
                     or type(limit) is not int or not 1 <= limit <= 20
                     or type(history) is not bool):
                 raise ValueError()
+            config = normalize_configuration(config)
         except (ValueError, UnicodeError):
             return self.json(400, {'error': 'INVALID_REQUEST'})
         use_ai = value.get('use_ai', False)

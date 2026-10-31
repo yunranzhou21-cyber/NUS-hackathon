@@ -1,0 +1,1067 @@
+{
+  "summary": {
+    "cases": 34,
+    "case_file_sha256": "87b05ad53854eded07775fb34710984b965f143dbbe3fbd9b66f45ce2f242fc1",
+    "parser_version": "1.2-typed-configuration",
+    "mode_A": {
+      "PASS": 19,
+      "SAFE_FAIL": 15
+    },
+    "historical_comparison": false,
+    "mode_A_pass_rate": 0.5588235294117647,
+    "mode_A_unsafe_errors": 0,
+    "scope_unknown_cases": 26,
+    "mode_B_diagnostic": {
+      "PASS": 12,
+      "SAFE_FAIL": 15
+    },
+    "retrieval_hit_rate_labeled_record": 1.0,
+    "latency_ms": {
+      "max": 399.027,
+      "mean": 353.36085294117646
+    },
+    "structural_checks_all_ok": true
+  },
+  "mode_A": [
+    {
+      "test_id": "T01",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120",
+        "serial_number": "120004"
+      },
+      "interpretation": {
+        "serial_number": "120004"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T02",
+      "category": "serial_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120",
+        "serial_number": "120005"
+      },
+      "interpretation": {
+        "serial_number": "120005"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "NO_MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T03",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120",
+        "serial_number": "120006"
+      },
+      "interpretation": {
+        "serial_number": "120006"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T04",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120",
+        "serial_number": "120352"
+      },
+      "interpretation": {
+        "serial_number": "120352"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T05",
+      "category": "serial_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120",
+        "serial_number": "120353"
+      },
+      "interpretation": {
+        "serial_number": "120353"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "NO_MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T06",
+      "category": "missing_configuration",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-120"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "IDENTIFIER_REQUIRED"
+      ],
+      "missing_fields": [
+        "serial_number"
+      ]
+    },
+    {
+      "test_id": "T07",
+      "category": "wrong_model",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-145",
+        "serial_number": "120006"
+      },
+      "interpretation": {
+        "serial_number": "120006"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "MODEL_NOT_EXACTLY_RESOLVED"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T08",
+      "category": "line_number_boundary",
+      "expected": "MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "757-200",
+        "line_number": "1"
+      },
+      "interpretation": {
+        "line_number": "1"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T09",
+      "category": "line_number_boundary",
+      "expected": "MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "757-200",
+        "line_number": "95"
+      },
+      "interpretation": {
+        "line_number": "95"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T10",
+      "category": "line_number_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "757-200",
+        "line_number": "96"
+      },
+      "interpretation": {
+        "line_number": "96"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "NO_MATCH",
+      "scope_reason_codes": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T11",
+      "category": "identifier_confusion",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "757-200",
+        "serial_number": "95"
+      },
+      "interpretation": {
+        "serial_number": "95"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "IDENTIFIER_REQUIRED"
+      ],
+      "missing_fields": [
+        "line_number"
+      ]
+    },
+    {
+      "test_id": "T12",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A320-211",
+        "manufacturer_serial_number": "1516"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T13",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A320-211",
+        "manufacturer_serial_number": "1624"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T14",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A320-211",
+        "manufacturer_serial_number": "1754"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T15",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A320-211",
+        "manufacturer_serial_number": "1755"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T16",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A321-211",
+        "manufacturer_serial_number": "1675"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T17",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A321-211",
+        "manufacturer_serial_number": "1711"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T18",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "A321-211",
+        "manufacturer_serial_number": "1754"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T19",
+      "category": "prefix_and_modification",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "600N",
+        "serial_number": "RN066",
+        "TB600N_007_2004_01_12_completed": false
+      },
+      "interpretation": {
+        "serial_number": "RN066"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T20",
+      "category": "prefix_and_modification",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "600N",
+        "serial_number": "RN067",
+        "TB600N_007_2004_01_12_completed": false
+      },
+      "interpretation": {
+        "serial_number": "RN067"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T21",
+      "category": "prefix_and_modification",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "600N",
+        "serial_number": "RN068",
+        "TB600N_007_2004_01_12_completed": false
+      },
+      "interpretation": {
+        "serial_number": "RN068"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T22",
+      "category": "prefix_and_modification",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "600N",
+        "serial_number": "RN068",
+        "TB600N_007_2004_01_12_completed": true
+      },
+      "interpretation": {
+        "serial_number": "RN068"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T23",
+      "category": "missing_configuration",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "600N",
+        "serial_number": "RN068"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T24",
+      "category": "serial_and_service_bulletin",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "Falcon 2000",
+        "serial_number": "123",
+        "F2000_A223_2001_10_17_actions_completed": false
+      },
+      "interpretation": {
+        "serial_number": "123"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T25",
+      "category": "serial_and_service_bulletin",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "Falcon 2000",
+        "serial_number": "132",
+        "F2000_A223_2001_10_17_actions_completed": false
+      },
+      "interpretation": {
+        "serial_number": "132"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T26",
+      "category": "serial_and_service_bulletin",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "Falcon 2000",
+        "serial_number": "132",
+        "F2000_A223_2001_10_17_actions_completed": true
+      },
+      "interpretation": {
+        "serial_number": "132"
+      },
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": [],
+      "why": "retrieved but declined to decide"
+    },
+    {
+      "test_id": "T27",
+      "category": "external_dependency",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {
+        "model": "EMB-145"
+      },
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 2,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T28",
+      "category": "retrieval_summary",
+      "expected": "ANSWER",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T29",
+      "category": "unsupported_precision",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "INSUFFICIENT_EVIDENCE",
+      "reason": "REQUESTED_VALUE_NOT_IN_RECORD",
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": [],
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T30",
+      "category": "historical_scope_contamination",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T31",
+      "category": "proposed_supersession",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "INSUFFICIENT_EVIDENCE",
+      "reason": "EFFECTIVE_STATUS_NOT_ESTABLISHED",
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": [],
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T32",
+      "category": "withdrawal_vs_current",
+      "expected": "ANSWER",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "EVIDENCE_FOUND",
+      "reason": null,
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "DOCUMENT_KIND_NOT_CONFIRMED_PROPOSAL"
+      ],
+      "missing_fields": []
+    },
+    {
+      "test_id": "T33",
+      "category": "citation_precision",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "INSUFFICIENT_EVIDENCE",
+      "reason": "EXACT_PAGE_UNAVAILABLE",
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": [],
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T34",
+      "category": "operational_overreach",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "submitted_configuration": {},
+      "interpretation": {},
+      "status": "INSUFFICIENT_EVIDENCE",
+      "reason": "OPERATIONAL_DECISION_OUT_OF_SCOPE",
+      "retrieved": true,
+      "rank": 1,
+      "scope_decision": "UNKNOWN",
+      "scope_reason_codes": [
+        "NO_EXPLICIT_APPLICABILITY_BLOCK",
+        "APPLICABILITY_NOT_FULLY_PARSED"
+      ],
+      "missing_fields": [],
+      "why": "explicit decline"
+    }
+  ],
+  "mode_B": [
+    {
+      "test_id": "T01",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T02",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T03",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T04",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T05",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T06",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "IDENTIFIER_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "T07",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "MODEL_NOT_EXACTLY_RESOLVED"
+      ]
+    },
+    {
+      "test_id": "T08",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T09",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T10",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T11",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "IDENTIFIER_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "T12",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T13",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T14",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T15",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T16",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T17",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T18",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T19",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T20",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T21",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T22",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T23",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T24",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T25",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T26",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T27",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    }
+  ]
+}

@@ -22,7 +22,8 @@ from collections import defaultdict
 from pathlib import Path
 
 from answerability import assess
-from applicability import evaluate, load_records, normalize_model, parse_record
+from configuration import normalize_configuration
+from applicability import PARSER_VERSION, evaluate, load_records, normalize_model, parse_record
 from prepare_data import make_value
 
 INPUT = "data/processed/records.jsonl"
@@ -147,6 +148,7 @@ def build_index(input_path=INPUT, database=DATABASE):
                     count += 1
         manifest = {
             "schema_version": SCHEMA_VERSION,
+            "parser_version": PARSER_VERSION,
             "input_sha256": input_hash(input_path),
             "records": str(len(records)), "passages": str(count),
         }
@@ -181,16 +183,28 @@ def extract_dockets(text, known_dockets):
 
 def query_plan(query, configuration, known_models, known_dockets=()):
     """Recognize identifiers and a small explicit vocabulary; refuse unexplained Chinese terms."""
-    config = {k: str(v).strip() for k, v in configuration.items()
-              if v is not None and str(v).strip()}
+    try:
+        config = normalize_configuration({k: v for k, v in configuration.items() if v is not None})
+    except (ValueError, AttributeError):
+        return None, 'INVALID_CONFIGURATION'
+    msn = re.compile(r"\b(?:MSN|manufacturer(?:'s)?\s+serial(?:\s+number)?)\s*[:#=]?\s*([A-Za-z0-9-]*\d[A-Za-z0-9-]*)", re.I)
+    msn_values = {m[1] for m in msn.finditer(query)}
+    if len(msn_values) > 1:
+        return None, 'CONFLICTING_IDENTIFIERS'
+    if msn_values:
+        value = next(iter(msn_values))
+        if config.get('manufacturer_serial_number') and config['manufacturer_serial_number'] != value:
+            return None, 'QUERY_CONFIGURATION_CONFLICT'
+        config['manufacturer_serial_number'] = value
+    query_without_msn = msn.sub(' ', query)
     inferred = {}
-    for match in IDENTIFIER.finditer(query):
+    for match in IDENTIFIER.finditer(query_without_msn):
         field = "serial_number" if match[1] else "line_number"
         value = match[1] or match[2]
         if field in inferred and inferred[field] != value:
             return None, "CONFLICTING_IDENTIFIERS"
         inferred[field] = value
-    remaining = IDENTIFIER.sub(" ", query)
+    remaining = IDENTIFIER.sub(" ", query_without_msn)
     for field, value in inferred.items():
         if field in config and config[field] != value:
             return None, "QUERY_CONFIGURATION_CONFLICT"
@@ -255,6 +269,7 @@ class SearchEngine:
         try:
             manifest = dict(self.connection.execute("SELECT key, value FROM manifest"))
             if (manifest.get("schema_version") != SCHEMA_VERSION
+                    or manifest.get("parser_version") != PARSER_VERSION
                     or manifest.get("input_sha256") != input_hash(input_path)):
                 raise ValueError("Search index stale; run: python search.py build")
             self.models = [r[0] for r in self.connection.execute(
