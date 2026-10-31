@@ -1,0 +1,843 @@
+{
+  "summary": {
+    "cases": 34,
+    "file_sha256_note": "see eval/ directory",
+    "mode_A": {
+      "SAFE_FAIL": 25,
+      "PASS": 9
+    },
+    "mode_A_pass_rate": 0.2647058823529412,
+    "mode_A_unsafe_errors": 0,
+    "mode_B_diagnostic": {
+      "PASS": 12,
+      "SAFE_FAIL": 15
+    },
+    "retrieval_hit_rate_labeled_record": 0.0,
+    "latency_ms": {
+      "max": 247.775,
+      "mean": 200.71667647058825
+    },
+    "structural_checks_all_ok": true
+  },
+  "mode_A": [
+    {
+      "test_id": "T01",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T02",
+      "category": "serial_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T03",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T04",
+      "category": "serial_boundary",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T05",
+      "category": "serial_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T06",
+      "category": "missing_configuration",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T07",
+      "category": "wrong_model",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T08",
+      "category": "line_number_boundary",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {
+        "line_number": "1"
+      },
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T09",
+      "category": "line_number_boundary",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {
+        "line_number": "95"
+      },
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T10",
+      "category": "line_number_boundary",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {
+        "line_number": "96"
+      },
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T11",
+      "category": "identifier_confusion",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {
+        "serial_number": "is"
+      },
+      "status": "NEEDS_CLARIFICATION",
+      "reason": "QUERY_CONFIGURATION_CONFLICT",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T12",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T13",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T14",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T15",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T16",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T17",
+      "category": "table_and_exceptions",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T18",
+      "category": "table_and_exceptions",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T19",
+      "category": "prefix_and_modification",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T20",
+      "category": "prefix_and_modification",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T21",
+      "category": "prefix_and_modification",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T22",
+      "category": "prefix_and_modification",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T23",
+      "category": "missing_configuration",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T24",
+      "category": "serial_and_service_bulletin",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T25",
+      "category": "serial_and_service_bulletin",
+      "expected": "MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T26",
+      "category": "serial_and_service_bulletin",
+      "expected": "NO_MATCH",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T27",
+      "category": "external_dependency",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T28",
+      "category": "retrieval_summary",
+      "expected": "ANSWER",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T29",
+      "category": "unsupported_precision",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T30",
+      "category": "historical_scope_contamination",
+      "expected": "UNKNOWN",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T31",
+      "category": "proposed_supersession",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T32",
+      "category": "withdrawal_vs_current",
+      "expected": "ANSWER",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "relevant record not retrieved"
+    },
+    {
+      "test_id": "T33",
+      "category": "citation_precision",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    },
+    {
+      "test_id": "T34",
+      "category": "operational_overreach",
+      "expected": "INSUFFICIENT_EVIDENCE",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "structural_ok": true,
+      "interpretation": {},
+      "status": "REFUSE",
+      "reason": "NO_EVIDENCE_FOR_QUERY_AND_FILTERS",
+      "retrieved": false,
+      "rank": null,
+      "scope_decision": null,
+      "why": "explicit decline"
+    }
+  ],
+  "mode_B": [
+    {
+      "test_id": "T01",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T02",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T03",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T04",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T05",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T06",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "IDENTIFIER_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "T07",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "MODEL_NOT_EXACTLY_RESOLVED"
+      ]
+    },
+    {
+      "test_id": "T08",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T09",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T10",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "NO_MATCH",
+      "reasons": [
+        "PROPOSED_SCOPE_ONLY_EFFECTIVENESS_UNVERIFIED"
+      ]
+    },
+    {
+      "test_id": "T11",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "IDENTIFIER_REQUIRED"
+      ]
+    },
+    {
+      "test_id": "T12",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T13",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T14",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T15",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T16",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T17",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T18",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "manufacturer_serial_number"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T19",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T20",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T21",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T22",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "TB600N_007_2004_01_12_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T23",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T24",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T25",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T26",
+      "outcome": "SAFE_FAIL",
+      "dropped_inputs": [
+        "F2000_A223_2001_10_17_actions_completed"
+      ],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    },
+    {
+      "test_id": "T27",
+      "outcome": "PASS",
+      "dropped_inputs": [],
+      "scope_decision": "UNKNOWN",
+      "reasons": [
+        "NOT_LATEST_OBSERVED_RECORD_IN_CSV"
+      ]
+    }
+  ]
+}
